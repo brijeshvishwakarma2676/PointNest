@@ -1,0 +1,41 @@
+{
+  "name": "customer_loyalty_portal_frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "env-cmd -f ./environments/.env.dev vite --host 0.0.0.0",
+    "uat": "env-cmd -f ./environments/.env.uat vite --host 0.0.0.0",
+    "staging": "env-cmd -f ./environments/.env.staging vite --host 0.0.0.0",
+    "prod": "env-cmd -f ./environments/.env.prod vite --host 0.0.0.0",
+    "build": "vite build",
+    "build-dev": "env-cmd -f ./environments/.env.dev vite build",
+    "build-uat": "env-cmd -f ./environments/.env.uat vite build",
+    "build-staging": "env-cmd -f ./environments/.env.staging vite build",
+    "build-prod": "env-cmd -f ./environments/.env.prod vite build",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "axios": "^1.13.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.13.1",
+    "tailwindcss": "^4.2.1",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "env-cmd": "^11.0.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "vite": "^7.3.1"
+  }
+}
