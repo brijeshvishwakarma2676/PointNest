@@ -10,11 +10,19 @@ const AddPurchase = () => {
 
   const [purchase, setPurchase] = useState({ phone: initialPhone, amount: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [notFoundModal, setNotFoundModal] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ phone: "", name: "" });
+  const [submittingCustomer, setSubmittingCustomer] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!purchase.phone || !purchase.amount) {
       toast.error("Phone number and amount are required");
+      return;
+    }
+
+    if (purchase.phone.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits");
       return;
     }
 
@@ -33,6 +41,16 @@ const AddPurchase = () => {
         amountNum,
       );
 
+      // Handle "Customer not found" gracefully
+      if (
+        response.success === false &&
+        response.message?.includes("Customer not found")
+      ) {
+        setNotFoundModal(true);
+        setNewCustomer({ phone: purchase.phone, name: "" });
+        return;
+      }
+
       // Handle various success responses
       if (
         response.success ||
@@ -48,9 +66,43 @@ const AddPurchase = () => {
         toast.error(response.message || "Failed to record purchase");
       }
     } catch (error) {
-      toast.error(error.message || "Error recording purchase");
+      // apiClient already formats the error into { message, status, data }
+      if (error.message?.includes("Customer not found")) {
+        setNotFoundModal(true);
+        setNewCustomer({ phone: purchase.phone, name: "" });
+      } else {
+        toast.error(error.message || "Error recording purchase");
+      }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCreateCustomer = async (e) => {
+    e.preventDefault();
+    if (!newCustomer.name || !newCustomer.phone) {
+      toast.error("Name and Phone are required");
+      return;
+    }
+
+    setSubmittingCustomer(true);
+    try {
+      // Import and use customersApi here
+      const { customersApi } = await import("../../customers/api");
+      const response = await customersApi.addCustomer(newCustomer);
+
+      if (response.success || response.id) {
+        toast.success("Customer created successfully!");
+        setNotFoundModal(false);
+        // We leave the phone number in the main purchase form so the user
+        // can just click "Complete Transaction" again.
+      } else {
+        toast.error(response.message || "Failed to create customer");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error creating customer");
+    } finally {
+      setSubmittingCustomer(false);
     }
   };
 
@@ -91,17 +143,19 @@ const AddPurchase = () => {
                 </div>
                 <input
                   type="tel"
+                  maxLength={10}
                   value={purchase.phone}
-                  onChange={(e) =>
-                    setPurchase({ ...purchase, phone: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    setPurchase({ ...purchase, phone: val });
+                  }}
                   className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-800 font-medium text-lg placeholder-gray-400 shadow-inner shadow-gray-100"
                   placeholder="e.g. 9999999999"
                   required
                 />
               </div>
               <p className="mt-2 text-xs font-semibold text-gray-500">
-                Must match the exact phone number used during registration.
+                Must be exactly 10 digits.
               </p>
             </div>
 
@@ -132,8 +186,8 @@ const AddPurchase = () => {
           <div className="mt-10">
             <button
               type="submit"
-              disabled={submitting}
-              className="group relative w-full flex items-center justify-center gap-3 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/30 transition-all font-bold text-lg hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
+              disabled={submitting || purchase.phone.length !== 10}
+              className="group relative w-full flex items-center justify-center gap-3 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/30 transition-all font-bold text-lg hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
             >
               <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out"></div>
               {submitting ? (
@@ -178,6 +232,110 @@ const AddPurchase = () => {
           </div>
         </form>
       </div>
+      {/* Not Found / Create Customer Overlay */}
+      {notFoundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/60 w-full max-w-md overflow-hidden transform transition-all relative">
+            <div className="px-6 py-5 border-b border-gray-100/60 flex justify-between items-center bg-white/50">
+              <h3 className="text-lg font-bold text-gray-900">
+                Customer Not Found
+              </h3>
+              <button
+                onClick={() => setNotFoundModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto bg-amber-100 rounded-full flex items-center justify-center mb-4 text-amber-500">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-600 font-medium">
+                  We couldn't find an account for{" "}
+                  <span className="font-bold text-gray-900">
+                    {purchase.phone}
+                  </span>
+                  . Would you like to create one now?
+                </p>
+              </div>
+
+              <form onSubmit={handleCreateCustomer} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Customer Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newCustomer.name}
+                    onChange={(e) =>
+                      setNewCustomer({ ...newCustomer, name: e.target.value })
+                    }
+                    className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all text-gray-800"
+                    placeholder="e.g. John Doe"
+                    required
+                  />
+                </div>
+                <div className="opacity-70">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Phone Number (Verified)
+                  </label>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={newCustomer.phone}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-transparent text-gray-600 cursor-not-allowed"
+                    readOnly
+                  />
+                </div>
+
+                <div className="mt-8 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNotFoundModal(false)}
+                    className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingCustomer}
+                    className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md shadow-amber-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {submittingCustomer ? "Creating..." : "Create Account"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

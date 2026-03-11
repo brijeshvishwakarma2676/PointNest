@@ -8,7 +8,7 @@ export const customersApi = {
    * @returns Promise resolving to the customers list response
    */
   getCustomers: async (params = {}) => {
-    return await apiClient.post(urls.customers_list, { params });
+    return await apiClient.post(urls.customers_list, params);
   },
 
   /**
@@ -18,5 +18,14 @@ export const customersApi = {
    */
   addCustomer: async (customerData) => {
     return await apiClient.post(urls.customers, customerData);
+  },
+
+  /**
+   * Fetches details of a specific customer
+   * @param {Object} payload - { phone } or { id }
+   * @returns Promise resolving to customer details
+   */
+  getCustomerDetails: async (payload) => {
+    return await apiClient.get(urls.get_details, { params: payload });
   },
 };
