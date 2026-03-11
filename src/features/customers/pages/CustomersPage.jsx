@@ -7,7 +7,11 @@ const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({ name: "", phone: "" });
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    phone: "",
+    email: "",
+  });
   const [existingCustomer, setExistingCustomer] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -85,7 +89,7 @@ const CustomersPage = () => {
         } else {
           // Brand new customer
           toast.success("Customer added successfully!");
-          setNewCustomer({ name: "", phone: "" });
+          setNewCustomer({ name: "", phone: "", email: "" });
           setIsModalOpen(false);
         }
         // Refresh the customer list to show the latest points/data
@@ -125,8 +129,48 @@ const CustomersPage = () => {
 
   const handleUpdateCustomer = async (e) => {
     e.preventDefault();
-    // Update API not yet implemented, so just prevent default and show toast for now
-    toast("Update API not yet implemented", { icon: "🚧" });
+
+    // Validation
+    if (!selectedCustomer.name?.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+
+    if (!selectedCustomer.phone?.trim() && !selectedCustomer.email?.trim()) {
+      toast.error("At least one contact method (Phone or Email) is required");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Construct payload based on requirements
+      const payload = {
+        id: selectedCustomer.id,
+        name: selectedCustomer.name.trim(),
+      };
+
+      if (selectedCustomer.phone?.trim())
+        payload.phone = selectedCustomer.phone.trim();
+      if (selectedCustomer.email?.trim())
+        payload.email = selectedCustomer.email.trim();
+
+      const response = await customersApi.updateCustomer(payload);
+
+      if (response.success) {
+        toast.success("Customer details updated successfully!");
+        setIsEditingCustomer(false);
+        setViewCustomerModal(false);
+        setSelectedCustomer(null);
+        // Refresh the background list to reflect new data
+        fetchCustomers(pagination.page);
+      } else {
+        toast.error(response.message || "Failed to update customer details");
+      }
+    } catch (error) {
+      toast.error(error.message || "Error updating customer");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -426,7 +470,7 @@ const CustomersPage = () => {
                   <button
                     onClick={() => {
                       setExistingCustomer(null);
-                      setNewCustomer({ name: "", phone: "" });
+                      setNewCustomer({ name: "", phone: "", email: "" });
                     }}
                     className="w-full py-3.5 px-4 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
                   >
@@ -473,6 +517,23 @@ const CustomersPage = () => {
                       className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800"
                       placeholder="e.g. 9999999999"
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Email Address (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      value={newCustomer.email}
+                      onChange={(e) =>
+                        setNewCustomer({
+                          ...newCustomer,
+                          email: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800"
+                      placeholder="e.g. john@example.com"
                     />
                   </div>
                 </div>
@@ -605,6 +666,23 @@ const CustomersPage = () => {
                       disabled={!isEditingCustomer}
                       className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={selectedCustomer.email || ""}
+                      onChange={(e) =>
+                        setSelectedCustomer({
+                          ...selectedCustomer,
+                          email: e.target.value,
+                        })
+                      }
+                      disabled={!isEditingCustomer}
+                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
                     />
                   </div>
                   <div>

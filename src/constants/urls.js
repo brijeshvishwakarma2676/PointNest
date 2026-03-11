@@ -5,5 +5,6 @@ export default {
   purchases: "purchases",
   customers: "customers/find-or-create",
   customers_list: "customers/list",
-  get_details: "customers/get_details",
+  get_details: "customers/get-details",
+  updated_customer_update: "customers/update",
 };
