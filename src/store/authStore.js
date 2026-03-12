@@ -93,6 +93,20 @@ const useAuthStore = create(
         });
       },
 
+      // Fetch/Refresh User Profile Data
+      refreshProfile: async () => {
+        try {
+          const userResponse = await authApi.getMe();
+          set({
+            user: userResponse.data || userResponse,
+          });
+          return { success: true };
+        } catch (error) {
+          console.error("Failed to refresh profile:", error);
+          return { success: false, message: error.message };
+        }
+      },
+
       // Clear generic errors
       clearError: () => set({ error: null }),
     }),

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
 
@@ -6,6 +6,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const navItems = [
     {
@@ -79,12 +80,40 @@ const Layout = ({ children }) => {
 
         <div className="p-4 border-t border-gray-200">
           {user && (
-            <div className="mb-4 px-4">
-              <p className="text-sm font-semibold text-gray-800 truncate">
-                {user.shop_name}
-              </p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            </div>
+            <button
+              onClick={() => setIsProfileOpen(true)}
+              className="w-full flex items-center justify-between px-4 py-3 mb-3 rounded-xl hover:bg-gray-100 transition-colors text-left"
+              title="View Profile"
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold border border-blue-200">
+                  {user.owner_name
+                    ? user.owner_name.charAt(0).toUpperCase()
+                    : "A"}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-sm font-semibold text-gray-800 truncate">
+                    {user.shop_name}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user.email || user.phone}
+                  </p>
+                </div>
+              </div>
+              <svg
+                className="w-5 h-5 text-gray-400 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
           )}
           <button
             onClick={logout}
@@ -149,8 +178,119 @@ const Layout = ({ children }) => {
               </Link>
             );
           })}
+
+          {/* Mobile Profile Button */}
+          {user && (
+            <button
+              onClick={() => setIsProfileOpen(true)}
+              className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500"
+            >
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold border border-blue-200 text-xs shadow-sm">
+                {user.owner_name
+                  ? user.owner_name.charAt(0).toUpperCase()
+                  : "A"}
+              </div>
+              <span className="text-[10px] font-medium">Profile</span>
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* Admin Profile Modal */}
+      {isProfileOpen && user && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsProfileOpen(false)}
+          ></div>
+          <div className="relative bg-white/70 backdrop-blur-3xl border border-white/40 shadow-2xl rounded-3xl w-full max-w-sm overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
+            {/* Header Curve */}
+            <div className="h-32 bg-linear-to-br from-blue-500 to-indigo-600 relative">
+              <div className="absolute -bottom-10 inset-x-0 flex justify-center">
+                <div className="h-20 w-20 bg-white rounded-full p-1 shadow-lg">
+                  <div className="h-full w-full bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-3xl font-bold border-2 border-white">
+                    {user.owner_name
+                      ? user.owner_name.charAt(0).toUpperCase()
+                      : "A"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 pt-14 pb-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                {user.owner_name}
+              </h2>
+              <p className="text-sm font-medium text-indigo-600 mb-6">
+                {user.shop_name}
+              </p>
+
+              <div className="space-y-4 text-left">
+                <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-gray-100">
+                  <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-xs text-gray-500 font-medium">
+                      Email Address
+                    </p>
+                    <p className="text-sm text-gray-900 font-semibold truncate">
+                      {user.email || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-gray-100">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">
+                      Phone Number
+                    </p>
+                    <p className="text-sm text-gray-900 font-semibold">
+                      {user.phone}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={() => setIsProfileOpen(false)}
+                  className="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

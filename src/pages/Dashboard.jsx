@@ -6,12 +6,16 @@ import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const user = useAuthStore((state) => state.user);
+  const refreshProfile = useAuthStore((state) => state.refreshProfile);
   const [recentCustomers, setRecentCustomers] = useState([]);
   const [metrics, setMetrics] = useState({ total: 0, loading: true });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        // Refresh full user profile/metrics from /me
+        refreshProfile();
+
         // Fetch Page 1, Size 5 for the recent list
         const response = await customersApi.getCustomers({ page: 1, size: 5 });
         if (response.success) {
@@ -48,10 +52,10 @@ const Dashboard = () => {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div className="bg-white/60 backdrop-blur-xl shadow-lg shadow-blue-900/5 p-6 rounded-3xl border border-white/50">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider">
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">
               Total Customers
             </p>
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -70,15 +74,16 @@ const Dashboard = () => {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-gray-900 tracking-tight">
-            {metrics.loading ? "..." : metrics.total}
+          <p className="text-3xl font-bold text-gray-900 tracking-tight">
+            {user?.metrics?.total_customers ??
+              (metrics.loading ? "..." : metrics.total)}
           </p>
         </div>
 
         <div className="bg-white/60 backdrop-blur-xl shadow-lg shadow-purple-900/5 p-6 rounded-3xl border border-white/50">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider">
-              Recent Purchases
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">
+              Total Purchases
             </p>
             <div className="p-2 bg-purple-100 rounded-lg">
               <svg
@@ -96,12 +101,14 @@ const Dashboard = () => {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-gray-900 tracking-tight">450</p>
+          <p className="text-3xl font-bold text-gray-900 tracking-tight">
+            {user?.metrics?.total_purchases ?? "0"}
+          </p>
         </div>
 
         <div className="bg-white/60 backdrop-blur-xl shadow-lg shadow-indigo-900/5 p-6 rounded-3xl border border-white/50">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider">
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">
               Points Issued
             </p>
             <div className="p-2 bg-indigo-100 rounded-lg">
@@ -120,9 +127,38 @@ const Dashboard = () => {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-indigo-600 tracking-tight">
-            2,300
+          <p className="text-3xl font-bold text-indigo-600 tracking-tight">
+            {user?.metrics?.total_points_issued?.toLocaleString() ?? "0"}
           </p>
+        </div>
+
+        <div className="bg-white/60 backdrop-blur-xl shadow-lg shadow-emerald-900/5 p-6 rounded-3xl border border-white/50">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">
+              Total Revenue
+            </p>
+            <div className="p-2 bg-emerald-100 rounded-lg">
+              <svg
+                className="w-5 h-5 text-emerald-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-bold text-emerald-600">₹</span>
+            <p className="text-3xl font-bold text-gray-900 tracking-tight">
+              {user?.metrics?.total_revenue?.toLocaleString() ?? "0"}
+            </p>
+          </div>
         </div>
       </div>
 
