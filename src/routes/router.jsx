@@ -9,6 +9,8 @@ import AddPurchase from "../features/purchases/pages/AddPurchase";
 import PointsLookup from "../pages/PointsLookup";
 import Layout from "../components/layout/Layout";
 import NotFound from "../pages/NotFound";
+import RedeemPoints from "../features/redemptions/pages/RedeemPoints";
+import PointsHistory from "../features/customers/pages/PointsHistory";
 
 // A wrapper component that checks for authentication
 const ProtectedRoute = ({ children }) => {
@@ -94,6 +96,22 @@ export default function Router() {
           element={
             <ProtectedRoute>
               <PointsLookup />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/redeem"
+          element={
+            <ProtectedRoute>
+              <RedeemPoints />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <PointsHistory />
             </ProtectedRoute>
           }
         />

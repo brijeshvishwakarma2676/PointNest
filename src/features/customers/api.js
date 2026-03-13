@@ -47,4 +47,13 @@ export const customersApi = {
         throw err;
       });
   },
+
+  /**
+   * Fetches the points ledger (passbook) for a specific customer
+   * @param {Object} params - { customer_id, page, size }
+   * @returns Promise resolving to the paginated ledger data
+   */
+  getCustomerLedger: async (params) => {
+    return await apiClient.get(urls.customer_points_history, { params });
+  },
 };
