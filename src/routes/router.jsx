@@ -8,6 +8,7 @@ import CustomersPage from "../features/customers/pages/CustomersPage";
 import AddPurchase from "../features/purchases/pages/AddPurchase";
 import PointsLookup from "../pages/PointsLookup";
 import Layout from "../components/layout/Layout";
+import NotFound from "../pages/NotFound";
 
 // A wrapper component that checks for authentication
 const ProtectedRoute = ({ children }) => {
@@ -96,6 +97,9 @@ export default function Router() {
             </ProtectedRoute>
           }
         />
+
+        {/* Catch-all 404 route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
