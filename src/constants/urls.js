@@ -1,6 +1,7 @@
 export default {
   login: "auth/login",
   register: "auth/register",
+  refresh_token: "auth/refresh",
   get_me: "users/me",
   purchases: "purchases",
   customers: "customers/find-or-create",

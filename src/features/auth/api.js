@@ -20,11 +20,17 @@ export const authApi = {
     return await apiClient.post(urls.register, userData);
   },
 
-  /**
-   * Fetches the current logged in user's profile
-   * @returns Promise resolving to the user profile response
-   */
   getMe: async () => {
     return await apiClient.get(urls.get_me);
+  },
+  /**
+   * Refreshes the access token using a refresh token
+   * @param {string} refreshToken - The refresh token
+   * @returns Promise resolving to the new tokens
+   */
+  refreshToken: async (refreshToken) => {
+    return await apiClient.post(urls.refresh_token, {
+      refresh_token: refreshToken,
+    });
   },
 };

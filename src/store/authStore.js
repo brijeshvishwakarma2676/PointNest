@@ -6,7 +6,8 @@ const useAuthStore = create(
   persist(
     (set) => ({
       user: null, // Holds user profile data (shop_name, owner_name, etc.)
-      token: null, // Holds JWT access_token
+      accessToken: null, // Holds JWT access_token
+      refreshToken: null, // Holds JWT refresh_token
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -18,11 +19,11 @@ const useAuthStore = create(
           const loginResponse = await authApi.login(credentials);
 
           if (loginResponse.success) {
-            const { access_token } = loginResponse.data;
+            const { access_token, refresh_token } = loginResponse.data;
 
-            // Save token to localStorage for the Axios interceptor immediately
-            // so that subsequent requests (like getMe) can use it.
+            // Save tokens to localStorage for persistent interceptor access
             localStorage.setItem("access_token", access_token);
+            localStorage.setItem("refresh_token", refresh_token);
 
             // Fetch User Profile Data
             try {
@@ -30,7 +31,8 @@ const useAuthStore = create(
 
               // Save complete user state (token and profile)
               set({
-                token: access_token,
+                accessToken: access_token,
+                refreshToken: refresh_token,
                 user: userResponse.data || userResponse, // Handle based on actual api wrapper response
                 isAuthenticated: true,
                 isLoading: false,
@@ -39,8 +41,9 @@ const useAuthStore = create(
               return { success: true, message: loginResponse.message };
               // eslint-disable-next-line no-unused-vars
             } catch (error) {
-              // If profile fetch fails, clean up the token since the login flow isn't complete
+              // If profile fetch fails, clean up tokens
               localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
               set({ isLoading: false, error: "Failed to fetch user profile" });
               return {
                 success: false,
@@ -85,9 +88,11 @@ const useAuthStore = create(
       // Logout Action
       logout: () => {
         localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         set({
           user: null,
-          token: null,
+          accessToken: null,
+          refreshToken: null,
           isAuthenticated: false,
           error: null,
         });
@@ -113,7 +118,8 @@ const useAuthStore = create(
     {
       name: "auth-storage", // name of the item in the storage (must be unique)
       partialize: (state) => ({
-        token: state.token,
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }), // only persist these fields

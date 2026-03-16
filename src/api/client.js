@@ -28,11 +28,43 @@ apiClient.interceptors.response.use(
     // Return just the data part of the response for easier handling
     return response.data;
   },
-  (error) => {
-    // If we get a 401, we might want to automatically log the user out
-    if (error.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      // Could also trigger a global Zustand action here to clear user state
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If we get a 401 and it's not a retry already
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem("refresh_token");
+        if (!refreshToken) {
+          // No refresh token, force logout
+          handleAuthFailure();
+          return Promise.reject(error);
+        }
+
+        // Try to refresh the token
+        // Note: Using axios directly instead of apiClient to avoid interceptor loop if refresh returns 401
+        const response = await axios.post(
+          `${import.meta.env.VITE_REACT_APP_BASE_URL}/auth/refresh`,
+          { refresh_token: refreshToken },
+        );
+
+        if (response.data?.success) {
+          const { access_token } = response.data.data;
+
+          // Save new token
+          localStorage.setItem("access_token", access_token);
+
+          // Retry the original request with the new token
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed, log user out
+        handleAuthFailure();
+        return Promise.reject(refreshError);
+      }
     }
 
     // Format error message to be easily consumable by the UI
@@ -48,5 +80,17 @@ apiClient.interceptors.response.use(
     return Promise.reject(customError);
   },
 );
+
+// Helper to clear auth and potentially redirect
+function handleAuthFailure() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  // If we were using window.location.href = '/login', it would force a full reload.
+  // Better to let the app state handle it if possible, but for a global interceptor,
+  // sometimes a reload or direct redirect is safest to clear all state.
+  if (window.location.pathname !== "/") {
+    window.location.href = "/";
+  }
+}
 
 export default apiClient;
