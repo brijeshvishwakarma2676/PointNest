@@ -9,5 +9,6 @@ export default {
   get_details: "customers/get-details",
   updated_customer_update: "customers/update",
   points_redeem: "redemptions/redeem",
+  redemptions_list: "redemptions",
   customer_points_history: "customers/ledger",
 };
