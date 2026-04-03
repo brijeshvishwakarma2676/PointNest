@@ -2,36 +2,56 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import { customersApi } from "../features/customers/api";
+import { purchasesApi } from "../features/purchases/api";
+import { formatDate, formatTime } from "../utils/dateUtils";
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const user = useAuthStore((state) => state.user);
   const refreshProfile = useAuthStore((state) => state.refreshProfile);
   const [recentCustomers, setRecentCustomers] = useState([]);
+  const [recentPurchases, setRecentPurchases] = useState([]);
+  const [purchasePage, setPurchasePage] = useState(1);
+  const [purchaseTotal, setPurchaseTotal] = useState(0);
   const [metrics, setMetrics] = useState({ total: 0, loading: true });
+  const [purLoading, setPurLoading] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Refresh full user profile/metrics from /me
         refreshProfile();
-
-        // Fetch Page 1, Size 5 for the recent list
-        const response = await customersApi.getCustomers({ page: 1, size: 5 });
-        if (response.success) {
-          setRecentCustomers(response.data.items || []);
-          setMetrics({ total: response.data.total || 0, loading: false });
-        } else {
-          toast.error("Failed to load dashboard data");
-          setMetrics((prev) => ({ ...prev, loading: false }));
+        const custRes = await customersApi.getCustomers({ page: 1, size: 5 });
+        if (custRes.success) {
+          setRecentCustomers(custRes.data.items || []);
+          setMetrics({ total: custRes.data.total || 0, loading: false });
         }
       } catch (error) {
-        toast.error(error.message || "Failed to load dashboard data");
+        toast.error("Failed to load metrics");
         setMetrics((prev) => ({ ...prev, loading: false }));
       }
     };
 
     fetchDashboardData();
+  }, []);
+
+  const fetchRecentPurchases = async (page) => {
+    setPurLoading(true);
+    try {
+      const purRes = await purchasesApi.getPurchases({ page, size: 5 });
+      if (purRes.success) {
+        setRecentPurchases(purRes.data.items || []);
+        setPurchaseTotal(purRes.data.total || 0);
+        setPurchasePage(purRes.data.page);
+      }
+    } catch (error) {
+      toast.error("Failed to load recent purchases");
+    } finally {
+      setPurLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecentPurchases(1);
   }, []);
 
   return (
@@ -164,15 +184,17 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Customers List */}
-        <div className="lg:col-span-2">
-          <div className="bg-white/60 backdrop-blur-xl shadow-lg shadow-gray-900/5 rounded-3xl border border-white/50 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100/60 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-gray-900">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Recent Customers List */}
+          <div className="bg-white/60 backdrop-blur-xl shadow-xl shadow-gray-900/5 rounded-[32px] border border-white/50 overflow-hidden">
+            <div className="px-8 py-6 border-b border-gray-100/60 flex justify-between items-center bg-white/40">
+              <h2 className="text-xl font-black text-gray-900 flex items-center gap-3">
+                <span className="h-6 w-1.5 bg-blue-600 rounded-full"></span>
                 Recent Customers
               </h2>
               <Link
                 to="/customers"
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                className="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-xl transition-colors"
               >
                 View All
               </Link>
@@ -180,41 +202,41 @@ const Dashboard = () => {
 
             <div className="divide-y divide-gray-100/60 w-full overflow-x-auto">
               {metrics.loading ? (
-                <div className="p-8 text-center text-gray-500 font-medium">
+                <div className="p-12 text-center text-gray-400 font-bold italic opacity-60">
                   Loading customers...
                 </div>
               ) : recentCustomers.length === 0 ? (
-                <div className="p-8 text-center text-gray-500 font-medium">
+                <div className="p-12 text-center text-gray-400 font-bold italic opacity-60">
                   No customers yet
                 </div>
               ) : (
                 <table className="w-full text-left whitespace-nowrap">
-                  <tbody className="divide-y divide-gray-100/60">
+                  <tbody className="divide-y divide-gray-50/50">
                     {recentCustomers.map((customer) => (
                       <tr
                         key={customer.id}
-                        className="hover:bg-white/40 transition-colors"
+                        className="group hover:bg-white/60 transition-all"
                       >
-                        <td className="p-4 sm:px-6">
+                        <td className="px-8 py-5">
                           <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 shrink-0 bg-linear-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center font-bold text-gray-600 border border-white">
+                            <div className="h-12 w-12 shrink-0 bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center font-black text-blue-600 border border-white shadow-sm transition-transform group-hover:scale-110">
                               {customer.name
                                 ? customer.name.charAt(0).toUpperCase()
                                 : "?"}
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-gray-900">
+                              <p className="text-sm font-black text-gray-900 group-hover:text-blue-600 transition-colors">
                                 {customer.name}
                               </p>
-                              <p className="text-xs font-medium text-gray-500">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                 {customer.phone}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 sm:px-6 text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
-                            {customer.points} pts
+                        <td className="px-8 py-5 text-right">
+                          <span className="inline-flex items-center px-4 py-1.5 rounded-xl text-xs font-black bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-xs">
+                            {customer.points} <span className="opacity-70 ml-1">pts</span>
                           </span>
                         </td>
                       </tr>
@@ -223,6 +245,97 @@ const Dashboard = () => {
                 </table>
               )}
             </div>
+          </div>
+
+          {/* Recent Purchases List */}
+          <div className="bg-white/60 backdrop-blur-xl shadow-xl shadow-gray-900/5 rounded-[32px] border border-white/50 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="px-8 py-6 border-b border-gray-100/60 flex justify-between items-center bg-white/40">
+              <h2 className="text-xl font-black text-gray-900 flex items-center gap-3">
+                <span className="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+                Recent Purchases
+              </h2>
+            </div>            <div className="divide-y divide-gray-100/60 w-full overflow-x-auto min-h-[300px]">
+              {purLoading ? (
+                <div className="p-12 text-center text-gray-400 font-bold italic opacity-60">
+                  <span className="animate-pulse">Fetching transactions...</span>
+                </div>
+              ) : recentPurchases.length === 0 ? (
+                <div className="p-12 text-center text-gray-400 font-bold italic opacity-60 text-lg">
+                  No purchases recorded yet
+                </div>
+              ) : (
+                <table className="w-full text-left whitespace-nowrap">
+                  <thead>
+                    <tr className="bg-gray-50/30">
+                      <th className="px-8 py-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">Customer</th>
+                      <th className="px-8 py-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] text-right">Amount</th>
+                      <th className="px-8 py-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] text-right">Points</th>
+                      <th className="px-8 py-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] text-right">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50/50">
+                    {recentPurchases.map((purchase) => (
+                      <tr
+                        key={purchase.id}
+                        className="group hover:bg-white/60 transition-all"
+                      >
+                        <td className="px-8 py-5">
+                          <div>
+                            <p className="text-sm font-black text-gray-900 group-hover:text-emerald-600 transition-colors">
+                              {purchase.customer_name}
+                            </p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                              {purchase.customer_phone}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <span className="text-base font-black text-gray-900">
+                             <span className="text-emerald-600 mr-0.5 font-bold">₹</span>{purchase.amount?.toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black bg-blue-50 text-blue-600 border border-blue-100 uppercase tracking-tighter">
+                            +{purchase.points_earned} PTS
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <p className="text-sm font-black text-gray-700">
+                            {formatDate(purchase.created_at)}
+                          </p>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            {formatTime(purchase.created_at)}
+                          </p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Dash Pagination */}
+            {purchaseTotal > 5 && (
+              <div className="px-8 py-4 bg-white/40 border-t border-gray-100/60 flex items-center justify-between">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Page {purchasePage}</span>
+                <div className="flex gap-2">
+                   <button 
+                     disabled={purchasePage === 1 || purLoading}
+                     onClick={() => fetchRecentPurchases(purchasePage - 1)}
+                     className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all disabled:opacity-30"
+                   >
+                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                   </button>
+                   <button 
+                     disabled={recentPurchases.length < 5 || (purchasePage * 5 >= purchaseTotal) || purLoading}
+                     onClick={() => fetchRecentPurchases(purchasePage + 1)}
+                     className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all disabled:opacity-30"
+                   >
+                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+                   </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

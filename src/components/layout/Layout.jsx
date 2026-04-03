@@ -25,8 +25,8 @@ const Layout = ({ children }) => {
       icon: "M12 6v6m0 0v6m0-6h6m-6 0H6",
     },
     {
-      name: "Find Points",
-      path: "/points",
+      name: "Purchases",
+      path: "/purchases",
       icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
     },
     {

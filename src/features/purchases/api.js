@@ -14,4 +14,12 @@ export const purchasesApi = {
       `${urls.purchases}?phone=${phone}&amount=${amount}`,
     );
   },
+
+  /**
+   * Fetches the recent purchases for the shop
+   * @param {Object} params - page and size
+   */
+  getPurchases: async (params = { page: 1, size: 10 }) => {
+    return await apiClient.get(urls.purchases, { params });
+  },
 };

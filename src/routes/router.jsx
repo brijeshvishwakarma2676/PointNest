@@ -6,7 +6,7 @@ import ForgotPasswordPage from "../features/auth/pages/ForgotPasswordPage";
 import Dashboard from "../pages/Dashboard";
 import CustomersPage from "../features/customers/pages/CustomersPage";
 import AddPurchase from "../features/purchases/pages/AddPurchase";
-import PointsLookup from "../pages/PointsLookup";
+import Purchases from "../pages/Purchases";
 import Layout from "../components/layout/Layout";
 import NotFound from "../pages/NotFound";
 import RedeemPoints from "../features/redemptions/pages/RedeemPoints";
@@ -92,10 +92,10 @@ export default function Router() {
           }
         />
         <Route
-          path="/points"
+          path="/purchases"
           element={
             <ProtectedRoute>
-              <PointsLookup />
+              <Purchases />
             </ProtectedRoute>
           }
         />
