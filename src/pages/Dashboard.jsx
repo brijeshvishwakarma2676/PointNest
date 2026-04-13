@@ -475,7 +475,7 @@ const Dashboard = () => {
               new advanced analytics suite. Treat your data like high-end
               editorial content.
             </p>
-            <button className="bg-[#2444eb] text-white px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:bg-[#0934e0] transition-all shadow-xl shadow-blue-500/25 active:scale-95">
+            <button className="bg-[#2444eb] text-white px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:bg-gray-500 transition-all shadow-xl shadow-blue-500/25 active:scale-95 cursor-not-allowed">
               Upgrade to Pro Tier
             </button>
           </div>

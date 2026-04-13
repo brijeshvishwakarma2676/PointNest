@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "env-cmd -f ./environments/.env.dev vite --host 0.0.0.0",
     "uat": "env-cmd -f ./environments/.env.uat vite --host 0.0.0.0",
+    "local": "env-cmd -f ./environments/.env.local vite --host 0.0.0.0",
     "staging": "env-cmd -f ./environments/.env.staging vite --host 0.0.0.0",
     "prod": "env-cmd -f ./environments/.env.prod vite --host 0.0.0.0",
     "build": "vite build",
     "build-dev": "env-cmd -f ./environments/.env.dev vite build",
+    "build-local": "env-cmd -f ./environments/.env.local vite build",
     "build-uat": "env-cmd -f ./environments/.env.uat vite build",
     "build-staging": "env-cmd -f ./environments/.env.staging vite build",
     "build-prod": "env-cmd -f ./environments/.env.prod vite build",

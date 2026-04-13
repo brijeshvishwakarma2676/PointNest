@@ -46,14 +46,29 @@ const Layout = ({ children }) => {
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex w-64 flex-col bg-white/70 backdrop-blur-xl border-r border-gray-200">
         <div className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 shadow-sm">
-              <span className="text-white font-bold text-xl">P</span>
+          <Link
+            to="/dashboard"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/dashboard";
+            }}
+            className="group relative inline-block"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 shadow-sm group-hover:shadow-blue-500/20 transition-all">
+                <span className="text-white font-bold text-xl">P</span>
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600 tracking-tight group-hover:opacity-80 transition-opacity">
+                PointNest
+              </span>
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600 tracking-tight">
-              PointNest
-            </span>
-          </div>
+            
+            {/* Hard Reload Tooltip */}
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 bg-[#2c2a51] text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-xl border border-white/10 z-50 transform translate-x-2 group-hover:translate-x-0">
+              Click to hard reload
+              <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#2c2a51] rotate-45 border-b border-l border-white/10"></div>
+            </div>
+          </Link>
         </div>
 
         <nav className="flex-1 px-4 space-y-1">
