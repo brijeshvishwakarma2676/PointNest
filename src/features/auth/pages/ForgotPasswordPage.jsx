@@ -1,79 +1,125 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { 
+  ShieldAlert, 
+  Mail, 
+  ChevronRight, 
+  ArrowLeft, 
+  CheckCircle,
+  RefreshCw,
+  Fingerprint
+} from "lucide-react";
 
+/**
+ * ForgotPasswordPage - Lumina Noir Edition
+ * A recovery terminal for lost authorization keys.
+ */
 const ForgotPasswordPage = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    // Simulate API delay
+    setTimeout(() => {
+      setSubmitted(true);
+      setLoading(false);
+    }, 1500);
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-100 font-sans">
-      {/* Background blobs */}
-      <div className="absolute top-[10%] left-[20%] h-[400px] w-[400px] rounded-full bg-pink-300 opacity-60 mix-blend-multiply blur-[100px]"></div>
-      <div className="absolute bottom-[10%] right-[10%] h-[500px] w-[500px] rounded-full bg-blue-300 opacity-50 mix-blend-multiply blur-[120px]"></div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0A0A0B] font-sans antialiased text-white">
+      {/* Structural Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.01] rounded-full blur-[100px]" />
+      </div>
 
-      {/* Card */}
-      <div className="relative z-10 w-full max-w-md mx-4 md:mx-0 p-8 sm:p-10 rounded-[2.5rem] bg-white/40 backdrop-blur-2xl border border-white/50 shadow-xl text-center">
-        {!submitted ? (
-          <>
-            <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
-              Forgot Password?
-            </h2>
-            <p className="mt-3 mb-8 text-gray-600 font-medium">
-              Enter your email and we'll send a reset link.
-            </p>
+      <div className="relative z-10 w-full max-w-md mx-6 animate-in fade-in zoom-in-95 duration-700">
+        {/* Terminal Header */}
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white text-black border border-gray-200 shadow-2xl">
+             <Fingerprint size={36} strokeWidth={2} />
+          </div>
+          <div className="inline-flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-3">
+             Recovery Terminal
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter text-white mb-2 italic">
+            RECOVERY
+          </h1>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            Reset verified authorization keys
+          </p>
+        </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <input
-                type="email"
-                placeholder="Email Address"
-                className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full rounded-2xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-4 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all"
-              >
-                Send Reset Link
-              </button>
-            </form>
-          </>
-        ) : (
-          <>
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <svg
-                className="h-8 w-8 text-green-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+        {/* Interface Card */}
+        <div className="bg-[#111113] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl text-center">
+          {!submitted ? (
+            <>
+              <p className="mb-10 text-gray-400 font-medium text-sm leading-relaxed">
+                Enter your registered access protocol (email) to receive a one-time authorization reset link.
+              </p>
+
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="space-y-2 text-left">
+                  <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Access Profile</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                      <Mail size={16} />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="admin@lumina.io"
+                      className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-6 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-xs hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-20 shadow-xl mt-4"
+                >
+                  {loading ? (
+                    <RefreshCw className="animate-spin" size={18} />
+                  ) : (
+                    <>
+                      Request Recovery Link
+                      <ChevronRight size={18} strokeWidth={3} />
+                    </>
+                  )}
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="py-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-white/5 border border-white/10 shadow-inner">
+                <CheckCircle size={40} className="text-white" />
+              </div>
+              <h2 className="text-2xl font-black text-white tracking-tight mb-4">Transmission Sent</h2>
+              <p className="text-gray-400 font-medium text-sm leading-relaxed mb-10">
+                We've dispatched password reset instructions to your registered address. Please verify your inbox.
+              </p>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800">
-              Check Your Email
-            </h2>
-            <p className="mt-3 mb-8 text-gray-600">
-              We've sent password reset instructions to your address.
-            </p>
-          </>
-        )}
+          )}
 
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="text-sm font-semibold text-blue-600 hover:text-blue-800"
-          >
-            &larr; Back to Login
-          </Link>
+          <div className="mt-8 pt-8 border-t border-white/5">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest hover:text-gray-300 transition-colors"
+            >
+              <ArrowLeft size={14} />
+              Back to Secure Login
+            </Link>
+          </div>
+        </div>
+
+        {/* Global Footer */}
+        <div className="mt-12 text-center">
+           <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
+            Safety Protocol © 2026 Lumina
+          </p>
         </div>
       </div>
     </div>

@@ -1,29 +1,49 @@
-# PointNest Frontend
+# LUMINA · Enterprise Merchant Protocol
 
-A modern, iOS Glassmorphism-inspired Customer Loyalty Portal built with React and Vite.
+A mission-critical, high-performance merchant terminal designed for the next generation of entity loyalty. Lumina represents a shift from visual noise to structured, minimalist precision.
 
-## Features
+## ⬛ The Technical Manifesto
 
-- **Dashboard**: Real-time metrics overview with beautiful, glassy UI cards.
-- **Customers**: Manage loyalty members and view their points balances.
-- **Add Purchase**: Reward points directly via transaction interfaces.
-- **Responsive Design**: Mobile-friendly bottom navigation and desktop persistent sidebars.
-- **Secure Authentication**: Robust JWT state management using Zustand.
+Lumina is built on the principle of **Zero-Latency Design**. Every interaction is engineered to provide immediate feedback, treating loyalty data as a strategic enterprise asset rather than a marketing afterthought.
 
-## Tech Stack
+### 🏛 Design Language
+- **Palette**: Pure Monochrome (Lumina Black/White) with high-contrast GRAY-50 utility zones.
+- **Topology**: 2.5rem (40px) radius standard for primary structural containers.
+- **Typography**: Bold, high-tracking uppercase headers for "At-A-Glance" cognitive efficiency.
+- **Iconography**: Lucide High-Precision (1.5px - 2.5px stroke weight) for visual clarity.
 
-- React 18
-- Vite
-- Tailwind CSS (with Glassmorphism utilities)
-- React Router DOM
-- Zustand (State Management)
-- Axios
-- React Hot Toast
+## 🛰 Core Subsystems
 
-## Setup and Running
+- **Analytics Mainframe**: Real-time yield monitoring (Customers, Transactions, Revenue) with high-impact visual indicators.
+- **Identity Proxy**: A secure enrollment and biometric-ready authentication protocol (Noir Edition).
+- **Yield Ledger**: High-density transaction auditing with multi-page navigation and sub-second filtering.
+- **Voucher Terminal**: Simplified point-to-discount conversion via authorized protocol IDs.
+- **Dossier Registry**: Advanced customer management with point-accumulation auditing and status tracking.
 
-1. Clone the repository
-2. Install dependencies: \`npm install\`
-3. Create a \`.env\` file based on the environment requirements.
-4. Run the development server: \`npm run dev\`
-5. Build for production: \`npm run build\`
+## 🛠 Strategic Tech Stack
+
+- **Framework**: React 19 + Vite 6 + ESM
+- **Styling**: Tailwind CSS 4.0 (Custom Lumina Tokenization)
+- **Icons**: Lucide React (Enterprise Standard)
+- **State**: Zustand (Thread-safe enterprise context)
+- **Routing**: React Router 7 (Isolated shell navigation)
+- **Validation**: Verifiable data patterns for phone (10-digit) and protocol compliance.
+
+## ⚙️ Operational Setup
+
+1. **Protocol Initialization**:
+   ```bash
+   npm install
+   ```
+
+2. **Regional Deployment**:
+   ```bash
+   npm run local    # Deploy localized development node
+   npm run prod     # Generate production-ready mainframe bundle
+   ```
+
+3. **Runtime Monitoring**:
+   Lumina utilizes standard browser dev tools for performance auditing. Goal: LCP < 1.0s.
+
+---
+*Verified by Lumina Group · Secure. Minimal. Strategic.*

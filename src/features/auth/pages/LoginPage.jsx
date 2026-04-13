@@ -2,7 +2,23 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/authStore";
 import toast from "react-hot-toast";
+import { 
+  ShieldCheck, 
+  Mail, 
+  Lock, 
+  ArrowRight, 
+  Fingerprint, 
+  Key,
+  ChevronRight,
+  Info,
+  ExternalLink,
+  RefreshCw
+} from "lucide-react";
 
+/**
+ * LoginPage - Lumina Noir Edition
+ * A high-impact, minimalist authentication terminal.
+ */
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, isLoading, error, clearError } = useAuthStore();
@@ -18,124 +34,137 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const result = await login(formData);
-
     if (result.success) {
-      toast.success(result.message || "Logged in successfully!");
+      toast.success(result.message || "Access Granted");
       navigate("/dashboard");
     } else {
-      toast.error(result.message || "Login failed");
+      toast.error(result.message || "Authentication Failed");
     }
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-100 font-sans">
-      {/* Background iOS-style blurry blobs */}
-      <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-purple-400 opacity-60 mix-blend-multiply blur-[120px]"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] h-[600px] w-[600px] rounded-full bg-blue-400 opacity-60 mix-blend-multiply blur-[120px]"></div>
-      <div className="absolute top-[20%] right-[20%] h-[400px] w-[400px] rounded-full bg-pink-400 opacity-50 mix-blend-multiply blur-[100px]"></div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0A0A0B] font-sans antialiased text-white">
+      {/* Structural Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/[0.02] rounded-full blur-[120px]" />
+      </div>
 
-      {/* Glassmorphism Card */}
-      <div className="relative z-10 w-full max-w-md mx-4 md:mx-0 p-8 sm:p-10 rounded-[2.5rem] bg-white/40 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)]">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-purple-600 shadow-lg">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.071 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
-              />
-            </svg>
+      <div className="relative z-10 w-full max-w-md mx-6 animate-in fade-in zoom-in-95 duration-700">
+        {/* Terminal Header */}
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white text-black shadow-2xl shadow-gray-900 border border-gray-200">
+             <ShieldCheck size={36} strokeWidth={2.5} />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
-            PointNest
-          </h2>
-          <p className="mt-2 text-gray-600 font-medium">
-            Sign in to your account
+          <div className="inline-flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-3">
+             Registry Terminal v3
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter text-white mb-2 italic">
+            LUMINA
+          </h1>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            Identity Authorization Protocol
           </p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm mb-4">
-              {error}
+        {/* Auth Interface */}
+        <div className="bg-[#111113] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden relative">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest mb-6 flex items-center gap-3">
+                <Info size={14} />
+                {error}
+              </div>
+            )}
+            
+            <div className="space-y-2">
+               <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Access Profile (Email)</label>
+               <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center极 pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                  <Mail size={16} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="name@lumina.io"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                  required
+                />
+              </div>
             </div>
-          )}
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-          </div>
 
-          <div>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-          </div>
+            <div className="space-y-2">
+               <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Authorization Key</label>
+               <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                  <Lock size={16} />
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                  required
+                />
+              </div>
+            </div>
 
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center">
-              <input
-                id="remember"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 bg-white/50"
-              />
-              <label
-                htmlFor="remember"
-                className="ml-2 block text-sm font-medium text-gray-700"
-              >
-                Remember me
+            <div className="flex items-center justify-between px-1">
+              <label className="flex items-center group cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded-lg bg-white/5 border-white/10 checked:bg-white checked:border-white transition-all appearance-none cursor-pointer border ring-offset-[#0A0A0B] focus:ring-1 focus:ring-white"
+                />
+                <span className="ml-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-gray-300 transition-colors">Persistent Session</span>
               </label>
+              <Link
+                to="/forgot-password"
+                className="text-[10px] font-black text-white uppercase tracking-widest border-b border-white/[0.15] hover:border-white transition-all"
+              >
+                Reset Access
+              </Link>
             </div>
-            <Link
-              to="/forgot-password"
-              className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="mt-4 w-full flex items-center justify-center gap-3 py-6 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-xs hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-20 shadow-xl"
             >
-              Forgot info?
+              {isLoading ? (
+                <RefreshCw className="animate-spin" size={18} />
+              ) : (
+                <>
+                  Establish Connection
+                  <ChevronRight size={18} strokeWidth={3} />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-12 pt-8 border-t border-white/5 text-center">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
+              Not a verified partner?
+            </p>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-2xl border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/[0.03] transition-all"
+            >
+              Request Enrollment
+              <ExternalLink size={12} />
             </Link>
           </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`mt-4 w-full rounded-2xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-4 text-base font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              isLoading
-                ? "opacity-70 cursor-not-allowed"
-                : "cursor-pointer shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5"
-            }`}
-          >
-            {isLoading ? "Signing In..." : "Sign In"}
-          </button>
-        </form>
-
-        <p className="mt-8 text-center text-sm font-medium text-gray-600">
-          New to PointNest?{" "}
-          <Link
-            to="/register"
-            className="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            Create an account
-          </Link>
-        </p>
+        {/* Global Footer */}
+        <div className="mt-12 text-center">
+           <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
+            Secure Shell © 2026 Lumina Enterprise
+          </p>
+        </div>
       </div>
     </div>
   );
