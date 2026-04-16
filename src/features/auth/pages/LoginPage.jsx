@@ -80,7 +80,7 @@ const LoginPage = () => {
             <div className="space-y-2">
                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Access Profile (Email)</label>
                <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center极 pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                   <Mail size={16} />
                 </div>
                 <input
@@ -91,7 +91,7 @@ const LoginPage = () => {
                   onChange={handleChange}
                   className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
                   required
-                />
+                  />
               </div>
             </div>
 

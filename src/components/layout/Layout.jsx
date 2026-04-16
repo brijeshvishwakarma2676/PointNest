@@ -72,11 +72,11 @@ const Layout = ({ children }) => {
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { name: "Client Registry", path: "/customers", icon: Users },
-    { name: "New Allocation", path: "/purchase", icon: PlusCircle },
-    { name: "Audit Ledger", path: "/purchases", icon: Receipt },
-    { name: "Yield Terminal", path: "/redeem", icon: CreditCard },
-    { name: "Event History", path: "/history", icon: History },
+    { name: "Customers", path: "/customers", icon: Users },
+    { name: "Add Purchase", path: "/purchase", icon: PlusCircle },
+    { name: "Purchases", path: "/purchases", icon: Receipt },
+    { name: "Redeem Points", path: "/redeem", icon: CreditCard },
+    { name: "Redemptions", path: "/history", icon: History },
   ];
 
   const activePath = location.pathname;

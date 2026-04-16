@@ -72,25 +72,43 @@ const Dashboard = () => {
   const [metricsLoading, setMetricsLoading] = useState(true);
   const [purLoading, setPurLoading] = useState(false);
   const [redLoading, setRedLoading] = useState(false);
+  const [selectedDateFilter, setSelectedDateFilter] = useState("today");
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setMetricsLoading(true);
-      try {
-        await refreshProfile();
-      } catch (error) {
-        toast.error("Failed to load metrics");
-      } finally {
-        setMetricsLoading(false);
+  const fetchAllDashboardData = async (filter) => {
+    setMetricsLoading(true);
+    setPurLoading(true);
+    setRedLoading(true);
+    try {
+      // All three fetches are fired in parallel
+      const [_, purRes, redRes] = await Promise.all([
+        refreshProfile(filter),
+        purchasesApi.getPurchases({ page: 1, size: 5, date_filter: filter }),
+        redemptionsApi.getRedemptions({ page: 1, size: 10, date_filter: filter }),
+      ]);
+
+      if (purRes.success) {
+        setRecentPurchases(purRes.data.items || []);
+        setPurchaseTotal(purRes.data.total || 0);
+        setPurchasePage(purRes.data.page);
       }
-    };
-    fetchDashboardData();
-  }, [refreshProfile]);
+      if (redRes.success) {
+        setRecentRedemptions(redRes.data.items || []);
+        setRedemptionTotal(redRes.data.total || 0);
+        setRedemptionPage(redRes.data.page);
+      }
+    } catch (error) {
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setMetricsLoading(false);
+      setPurLoading(false);
+      setRedLoading(false);
+    }
+  };
 
   const fetchRecentRedemptions = async (page) => {
     setRedLoading(true);
     try {
-      const redRes = await redemptionsApi.getRedemptions({ page, size: 10 });
+      const redRes = await redemptionsApi.getRedemptions({ page, size: 10, date_filter: selectedDateFilter });
       if (redRes.success) {
         setRecentRedemptions(redRes.data.items || []);
         setRedemptionTotal(redRes.data.total || 0);
@@ -106,7 +124,7 @@ const Dashboard = () => {
   const fetchRecentPurchases = async (page) => {
     setPurLoading(true);
     try {
-      const purRes = await purchasesApi.getPurchases({ page, size: 5 });
+      const purRes = await purchasesApi.getPurchases({ page, size: 5, date_filter: selectedDateFilter });
       if (purRes.success) {
         setRecentPurchases(purRes.data.items || []);
         setPurchaseTotal(purRes.data.total || 0);
@@ -119,10 +137,11 @@ const Dashboard = () => {
     }
   };
 
+  // Re-fetch everything when the date filter changes (defaults to today on mount)
   useEffect(() => {
-    fetchRecentRedemptions(1);
-    fetchRecentPurchases(1);
-  }, []);
+    fetchAllDashboardData(selectedDateFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDateFilter]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-gray-900 p-4 md:p-8 max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
@@ -134,12 +153,34 @@ const Dashboard = () => {
             Dashboard Overview
           </h2>
           <p className="text-gray-500 text-sm mt-1 font-medium">
-            Real-time performance metrics and merchant activity.
+            Showing data for: <span className="font-black text-gray-900">
+              {selectedDateFilter === "today" ? "Today" :
+               selectedDateFilter === "yesterday" ? "Yesterday" :
+               selectedDateFilter === "7days" ? "Last 7 Days" :
+               selectedDateFilter === "30days" ? "Last 30 Days" : "All Time"}
+            </span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 text-sm font-bold shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center gap-2">
-            Export Records <ArrowDownToLine size={14} />
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <select
+              value={selectedDateFilter}
+              onChange={(e) => setSelectedDateFilter(e.target.value)}
+              className="appearance-none px-6 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-[11px] font-black uppercase tracking-widest shadow-sm hover:border-gray-300 focus:border-gray-900 outline-none transition-all cursor-pointer pr-10"
+            >
+              <option value="all">Protocol: All Time</option>
+              <option value="today">Protocol: Today</option>
+              <option value="yesterday">Protocol: Yesterday</option>
+              <option value="7days">Protocol: Last 7 Days</option>
+              <option value="30days">Protocol: Last 30 Days</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+               <ChevronDown size={14} />
+            </div>
+          </div>
+          
+          <button className="h-10 w-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:border-gray-200 transition-all shadow-sm group">
+            <ArrowDownToLine size={16} className="group-hover:translate-y-0.5 transition-transform" />
           </button>
         </div>
       </section>
