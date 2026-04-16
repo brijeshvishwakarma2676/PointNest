@@ -20,8 +20,8 @@ export const authApi = {
     return await apiClient.post(urls.register, userData);
   },
 
-  getMe: async () => {
-    return await apiClient.get(urls.get_me);
+  getMe: async (date_filter = "all") => {
+    return await apiClient.get(urls.get_me, { params: { date_filter } });
   },
   /**
    * Refreshes the access token using a refresh token

@@ -1,10 +1,62 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { 
+  Users, 
+  ShoppingCart, 
+  Award, 
+  Wallet, 
+  TrendingUp, 
+  TrendingDown,
+  ChevronDown, 
+  ArrowRight, 
+  Plus, 
+  UserPlus, 
+  Sparkles,
+  Search,
+  Activity,
+  ArrowUpRight,
+  ArrowDownToLine
+} from "lucide-react";
 import useAuthStore from "../store/authStore";
 import { purchasesApi } from "../features/purchases/api";
 import { redemptionsApi } from "../features/redemptions/api";
 import { formatDate, formatTime } from "../utils/dateUtils";
 import toast from "react-hot-toast";
+
+// --- Utility Components ---
+const StatCard = ({ title, value, icon: Icon, trend, trendUp, isDark, loading }) => (
+  <div className={`relative flex flex-col p-6 rounded-2xl transition-all duration-300 ${
+    isDark 
+      ? 'bg-[#0A0A0B] text-white border border-gray-800 shadow-xl shadow-black/20' 
+      : 'bg-white text-gray-900 border border-gray-100 shadow-sm hover:border-gray-200 hover:shadow-md'
+  }`}>
+    {isDark && <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>}
+
+    <div className="flex justify-between items-center mb-6">
+      <div className={`flex items-center gap-2.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+        <Icon size={18} strokeWidth={2} />
+        <span className="text-[11px] font-bold uppercase tracking-wider">{title}</span>
+      </div>
+      {!loading && (
+        <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold tracking-wide ${
+          isDark 
+            ? 'bg-gray-800/50 text-gray-300 border border-gray-700/50' 
+            : (trendUp ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700')
+        }`}>
+          {trendUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          {trend}
+        </div>
+      )}
+    </div>
+    
+    <div className="flex items-baseline gap-1 mt-auto">
+      {title.includes("Revenue") && <span className={`text-xl font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>₹</span>}
+      <p className="text-3xl font-bold tracking-tight">
+        {loading ? "..." : (value?.toLocaleString() ?? "0")}
+      </p>
+    </div>
+  </div>
+);
 
 const Dashboard = () => {
   const user = useAuthStore((state) => state.user);
@@ -17,478 +69,369 @@ const Dashboard = () => {
   const [redemptionTotal, setRedemptionTotal] = useState(0);
   const [isRedemptionsCollapsed, setIsRedemptionsCollapsed] = useState(false);
   const [isPurchasesCollapsed, setIsPurchasesCollapsed] = useState(false);
-  const [metrics, setMetrics] = useState({ total: 0, loading: true });
+  const [metricsLoading, setMetricsLoading] = useState(true);
   const [purLoading, setPurLoading] = useState(false);
   const [redLoading, setRedLoading] = useState(false);
+  const [selectedDateFilter, setSelectedDateFilter] = useState("today");
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        refreshProfile();
-      } catch (error) {
-        toast.error("Failed to load metrics");
-        setMetrics((prev) => ({ ...prev, loading: false }));
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
-
-  const fetchRecentRedemptions = async (page) => {
+  const fetchAllDashboardData = async (filter) => {
+    setMetricsLoading(true);
+    setPurLoading(true);
     setRedLoading(true);
     try {
-      const redRes = await redemptionsApi.getRedemptions({ page, size: 10 });
+      // All three fetches are fired in parallel
+      const [_, purRes, redRes] = await Promise.all([
+        refreshProfile(filter),
+        purchasesApi.getPurchases({ page: 1, size: 5, date_filter: filter }),
+        redemptionsApi.getRedemptions({ page: 1, size: 10, date_filter: filter }),
+      ]);
+
+      if (purRes.success) {
+        setRecentPurchases(purRes.data.items || []);
+        setPurchaseTotal(purRes.data.total || 0);
+        setPurchasePage(purRes.data.page);
+      }
       if (redRes.success) {
         setRecentRedemptions(redRes.data.items || []);
         setRedemptionTotal(redRes.data.total || 0);
         setRedemptionPage(redRes.data.page);
-        // Keep metrics total as total customers if that's what it was meant for, 
-        // or update if metrics refers to something else. 
-        // Usually metrics.total is total_customers from refreshProfile.
       }
     } catch (error) {
-      toast.error("Failed to load recent activity");
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setMetricsLoading(false);
+      setPurLoading(false);
+      setRedLoading(false);
+    }
+  };
+
+  const fetchRecentRedemptions = async (page) => {
+    setRedLoading(true);
+    try {
+      const redRes = await redemptionsApi.getRedemptions({ page, size: 10, date_filter: selectedDateFilter });
+      if (redRes.success) {
+        setRecentRedemptions(redRes.data.items || []);
+        setRedemptionTotal(redRes.data.total || 0);
+        setRedemptionPage(redRes.data.page);
+      }
+    } catch (error) {
+      toast.error("Failed to load redemptions");
     } finally {
       setRedLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchRecentRedemptions(1);
-  }, []);
-
   const fetchRecentPurchases = async (page) => {
     setPurLoading(true);
     try {
-      const purRes = await purchasesApi.getPurchases({ page, size: 5 });
+      const purRes = await purchasesApi.getPurchases({ page, size: 5, date_filter: selectedDateFilter });
       if (purRes.success) {
         setRecentPurchases(purRes.data.items || []);
         setPurchaseTotal(purRes.data.total || 0);
         setPurchasePage(purRes.data.page);
       }
     } catch (error) {
-      toast.error("Failed to load recent purchases");
+      toast.error("Failed to load purchases");
     } finally {
       setPurLoading(false);
     }
   };
 
+  // Re-fetch everything when the date filter changes (defaults to today on mount)
   useEffect(() => {
-    fetchRecentPurchases(1);
-  }, []);
+    fetchAllDashboardData(selectedDateFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDateFilter]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-10 font-body text-[#2c2a51]">
-      <style>{`
-        .font-headline { font-family: 'Manrope', sans-serif; }
-        .luminous-shadow { box-shadow: 0 20px 60px -15px rgba(44, 42, 81, 0.08); }
-      `}</style>
-
-      {/* Welcome Header */}
-      <section className="animate-in fade-in slide-in-from-top-4 duration-700">
-        <h2 className="text-4xl font-headline font-extrabold text-[#2c2a51] tracking-tight">
-          Performance Overview
-        </h2>
-        <p className="text-[#5a5781] mt-2 font-body font-medium">
-          Real-time data for your <span className="text-[#2444eb] font-bold">elite merchant</span> status.
-        </p>
-      </section>
-
-      {/* Stats Grid (Bento Style) */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-        {/* Total Customers */}
-        <div className="bg-white p-6 rounded-2xl luminous-shadow flex flex-col justify-between h-44 border border-white/40 transition-transform hover:scale-[1.02]">
-          <div className="flex justify-between items-start">
-            <span className="material-symbols-outlined text-[#2444eb] bg-[#2444eb]/10 p-2.5 rounded-xl">
-              group
+    <div className="min-h-screen bg-[#F8F9FA] text-gray-900 p-4 md:p-8 max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
+      
+      {/* Dashboard Header */}
+      <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Dashboard Overview
+          </h2>
+          <p className="text-gray-500 text-sm mt-1 font-medium">
+            Showing data for: <span className="font-black text-gray-900">
+              {selectedDateFilter === "today" ? "Today" :
+               selectedDateFilter === "yesterday" ? "Yesterday" :
+               selectedDateFilter === "7days" ? "Last 7 Days" :
+               selectedDateFilter === "30days" ? "Last 30 Days" : "All Time"}
             </span>
-            {metrics.loading ? (
-              <span className="h-4 w-12 bg-gray-50 animate-pulse rounded-full"></span>
-            ) : (
-              <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest">
-                +12%
-              </span>
-            )}
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-[#5a5781] uppercase tracking-[0.15em] mb-1">
-              Total Customers
-            </p>
-            <p className="text-3xl font-headline font-black text-[#2c2a51]">
-              {user?.metrics?.total_customers ??
-                (metrics.loading ? "..." : metrics.total?.toLocaleString())}
-            </p>
-          </div>
+          </p>
         </div>
-
-        {/* Total Purchases */}
-        <div className="bg-white p-6 rounded-2xl luminous-shadow flex flex-col justify-between h-44 border border-white/40 transition-transform hover:scale-[1.02]">
-          <div className="flex justify-between items-start">
-            <span className="material-symbols-outlined text-[#652fe7] bg-[#652fe7]/10 p-2.5 rounded-xl">
-              shopping_cart
-            </span>
-            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest">
-              +8%
-            </span>
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <select
+              value={selectedDateFilter}
+              onChange={(e) => setSelectedDateFilter(e.target.value)}
+              className="appearance-none px-6 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-[11px] font-black uppercase tracking-widest shadow-sm hover:border-gray-300 focus:border-gray-900 outline-none transition-all cursor-pointer pr-10"
+            >
+              <option value="all">Protocol: All Time</option>
+              <option value="today">Protocol: Today</option>
+              <option value="yesterday">Protocol: Yesterday</option>
+              <option value="7days">Protocol: Last 7 Days</option>
+              <option value="30days">Protocol: Last 30 Days</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+               <ChevronDown size={14} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black text-[#5a5781] uppercase tracking-[0.15em] mb-1">
-              Total Transactions
-            </p>
-            <p className="text-3xl font-headline font-black text-[#2c2a51]">
-              {user?.metrics?.total_purchases?.toLocaleString() ?? "0"}
-            </p>
-          </div>
-        </div>
-
-        {/* Points Issued */}
-        <div className="bg-white p-6 rounded-2xl luminous-shadow flex flex-col justify-between h-44 border border-white/40 transition-transform hover:scale-[1.02]">
-          <div className="flex justify-between items-start">
-            <span className="material-symbols-outlined text-[#b60051] bg-[#b60051]/10 p-2.5 rounded-xl">
-              stars
-            </span>
-            <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase tracking-widest">
-              Steady
-            </span>
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-[#5a5781] uppercase tracking-[0.15em] mb-1">
-              Points Issued
-            </p>
-            <p className="text-3xl font-headline font-black text-[#b60051]">
-              {user?.metrics?.total_points_issued?.toLocaleString() ?? "0"}
-            </p>
-          </div>
-        </div>
-
-        {/* Total Revenue */}
-        <div className="bg-linear-to-br from-[#2444eb] to-[#652fe7] p-6 rounded-2xl shadow-xl shadow-blue-900/20 flex flex-col justify-between h-44 text-white transition-transform hover:scale-[1.02]">
-          <div className="flex justify-between items-start">
-            <span className="material-symbols-outlined text-white bg-white/20 p-2.5 rounded-xl">
-              payments
-            </span>
-            <span className="text-[10px] font-black text-white/90 bg-white/10 px-3 py-1 rounded-full uppercase tracking-widest">
-              Record High
-            </span>
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-white/70 uppercase tracking-[0.15em] mb-1">
-              Total Revenue
-            </p>
-            <p className="text-3xl font-headline font-black flex items-baseline gap-1">
-              <span className="text-sm font-bold opacity-80">₹</span>
-              {user?.metrics?.total_revenue?.toLocaleString() ?? "0"}
-            </p>
-          </div>
+          
+          <button className="h-10 w-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:border-gray-200 transition-all shadow-sm group">
+            <ArrowDownToLine size={16} className="group-hover:translate-y-0.5 transition-transform" />
+          </button>
         </div>
       </section>
 
-      {/* Main Dashboard Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-        {/* Recent Purchases Table */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-8 luminous-shadow border border-white/50 overflow-hidden">
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
-              <h3 className="text-2xl font-headline font-black text-[#2c2a51]">
-                Recent Purchases
-              </h3>
-              <button
+      {/* Stats Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard 
+          title="Total Customers" 
+          value={user?.metrics?.total_customers} 
+          icon={Users} 
+          trend="+12.5%" 
+          trendUp={true}
+          loading={metricsLoading}
+        />
+        <StatCard 
+          title="Transactions" 
+          value={user?.metrics?.total_purchases} 
+          icon={ShoppingCart} 
+          trend="+8.2%" 
+          trendUp={true}
+          loading={metricsLoading}
+        />
+        <StatCard 
+          title="Points Issued" 
+          value={user?.metrics?.total_points_issued} 
+          icon={Award} 
+          trend="Steady" 
+          trendUp={true}
+          loading={metricsLoading}
+        />
+        <StatCard 
+          title="Total Revenue" 
+          value={user?.metrics?.total_revenue} 
+          icon={Wallet} 
+          trend="Record High" 
+          trendUp={true}
+          isDark={true}
+          loading={metricsLoading}
+        />
+      </section>
+
+      {/* Main Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Recent Purchases (Ledger) */}
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <h3 className="text-base font-bold text-gray-900">Recent Ledger</h3>
+              <button 
                 onClick={() => setIsPurchasesCollapsed(!isPurchasesCollapsed)}
-                className="p-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-[#2444eb] transition-all"
+                className="p-1 rounded-md hover:bg-gray-50 text-gray-400 transition-colors"
               >
-                <span
-                  className={`material-symbols-outlined transition-transform duration-300 block ${
-                    isPurchasesCollapsed ? "rotate-180" : ""
-                  }`}
-                >
-                  keyboard_arrow_down
-                </span>
+                <ChevronDown size={18} className={`transition-transform duration-300 ${isPurchasesCollapsed ? 'rotate-180' : ''}`} />
               </button>
             </div>
-            <Link
-              to="/purchases"
-              className="text-[#2444eb] font-bold text-xs uppercase tracking-widest hover:underline flex items-center gap-1"
-            >
-              Ledger <span className="material-symbols-outlined text-xs">arrow_forward</span>
+            <Link to="/purchases" className="text-gray-500 hover:text-gray-900 text-xs font-bold transition-colors flex items-center gap-1 uppercase tracking-widest">
+              View all <ArrowRight size={14} />
             </Link>
           </div>
 
           {!isPurchasesCollapsed && (
-            <>
-              <div className="overflow-x-auto min-h-[300px]">
-                {purLoading ? (
-                  <div className="p-20 text-center text-gray-400 font-bold italic opacity-60">
-                    <span className="animate-pulse">Analyzing transactions...</span>
-                  </div>
-                ) : recentPurchases.length === 0 ? (
-                  <div className="p-20 text-center text-gray-400 font-bold italic opacity-60 text-lg">
-                    No transactions yet.
-                  </div>
-                ) : (
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b border-gray-100">
-                        <th className="pb-4 font-black text-[10px] uppercase tracking-[0.2em] text-[#5a5781]">
-                          Customer
-                        </th>
-                        <th className="pb-4 font-black text-[10px] uppercase tracking-[0.2em] text-[#5a5781] text-right">
-                          Amount
-                        </th>
-                        <th className="pb-4 font-black text-[10px] uppercase tracking-[0.2em] text-[#5a5781] text-right">
-                          Points
-                        </th>
-                        <th className="pb-4 font-black text-[10px] uppercase tracking-[0.2em] text-[#5a5781] text-right">
-                          Timestamp
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {recentPurchases.map((purchase) => (
-                        <tr
-                          key={purchase.id}
-                          className="group hover:bg-[#f9f5ff] transition-all"
-                        >
-                          <td className="py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-[#f3eeff] flex items-center justify-center font-black text-[#2444eb] border border-white">
-                                {purchase.customer_name?.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-headline font-bold text-sm text-[#2c2a51]">
-                                  {purchase.customer_name}
-                                </p>
-                                <p className="text-[10px] font-black text-[#5a5781] uppercase tracking-widest leading-none">
-                                  {purchase.customer_phone}
-                                </p>
-                              </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest">Customer</th>
+                    <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right">Amount</th>
+                    <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right">Points</th>
+                    <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right hidden sm:table-cell">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {purLoading ? (
+                    <tr><td colSpan="4" className="py-10 text-center text-gray-400 text-sm italic">Updating ledger...</td></tr>
+                  ) : recentPurchases.length === 0 ? (
+                    <tr><td colSpan="4" className="py-10 text-center text-gray-400 text-sm italic">No recent transactions.</td></tr>
+                  ) : (
+                    recentPurchases.map((purchase) => (
+                      <tr key={purchase.id} className="group hover:bg-gray-50/50 transition-colors">
+                        <td className="py-4 px-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-900 border border-gray-100">
+                              {purchase.customer_name?.charAt(0)}
                             </div>
-                          </td>
-                          <td className="py-5 text-right font-headline font-black text-sm">
-                            <span className="text-[#2444eb] mr-0.5">₹</span>
-                            {purchase.amount?.toLocaleString()}
-                          </td>
-                          <td className="py-5 text-right">
-                            <span className="bg-[#2444eb]/10 text-[#2444eb] px-3 py-1 rounded-lg text-[10px] font-black tracking-tighter">
-                              +{purchase.points_earned} PTS
-                            </span>
-                          </td>
-                          <td className="py-5 text-right">
-                            <p className="text-[11px] font-black text-[#2c2a51]">
-                              {formatDate(purchase.created_at)}
-                            </p>
-                            <p className="text-[9px] font-black text-[#5a5781] uppercase tracking-widest leading-none">
-                              {formatTime(purchase.created_at)}
-                            </p>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-
-              {purchaseTotal > 5 && (
-                <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[10px] font-black text-[#5a5781] uppercase tracking-[0.2em]">
-                    Page {purchasePage}
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      disabled={purchasePage === 1 || purLoading}
+                            <div>
+                              <p className="font-bold text-sm text-gray-900">{purchase.customer_name}</p>
+                              <p className="text-[10px] text-gray-500 font-medium">{purchase.customer_phone}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2 text-right">
+                          <p className="font-bold text-sm text-gray-900">₹{purchase.amount?.toLocaleString()}</p>
+                        </td>
+                        <td className="py-4 px-2 text-right">
+                          <span className="inline-flex items-center text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-100/50">
+                            +{purchase.points_earned}
+                          </span>
+                        </td>
+                        <td className="py-4 px-2 text-right hidden sm:table-cell">
+                          <p className="text-xs font-bold text-gray-600">{formatDate(purchase.created_at)}</p>
+                          <p className="text-[10px] text-gray-400">{formatTime(purchase.created_at)}</p>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+              
+              {purchaseTotal > 5 && !purLoading && (
+                <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-50">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase">Page {purchasePage}</span>
+                  <div className="flex gap-1">
+                    <button 
+                      disabled={purchasePage === 1} 
                       onClick={() => fetchRecentPurchases(purchasePage - 1)}
-                      className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:text-[#2444eb] hover:bg-[#f3eeff] transition-all disabled:opacity-30"
+                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-30"
                     >
-                      <span className="material-symbols-outlined text-sm font-bold">
-                        arrow_back_ios_new
-                      </span>
+                      <ArrowRight size={14} className="rotate-180" />
                     </button>
-                    <button
-                      disabled={
-                        recentPurchases.length < 5 ||
-                        purchasePage * 5 >= purchaseTotal ||
-                        purLoading
-                      }
+                    <button 
+                      disabled={recentPurchases.length < 5 || purchasePage * 5 >= purchaseTotal}
                       onClick={() => fetchRecentPurchases(purchasePage + 1)}
-                      className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:text-[#2444eb] hover:bg-[#f3eeff] transition-all disabled:opacity-30"
+                      className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-30"
                     >
-                      <span className="material-symbols-outlined text-sm font-bold">
-                        arrow_forward_ios
-                      </span>
+                      <ArrowRight size={14} />
                     </button>
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 
-        {/* Side Column: Actions & Customers */}
-        <div className="space-y-8">
-          {/* Quick Actions */}
-          <div className="bg-[#f3eeff] rounded-3xl p-8 luminous-shadow relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 transition-transform group-hover:scale-110">
-              <span className="material-symbols-outlined text-8xl">bolt</span>
-            </div>
-            <h3 className="text-[10px] font-black text-[#2c2a51] uppercase tracking-[0.2em] mb-6">
-              Quick Actions
-            </h3>
-            <div className="space-y-3">
-              <Link
-                to="/purchase"
-                className="flex items-center justify-between p-4 bg-white rounded-2xl hover:shadow-lg hover:shadow-blue-900/5 transition-all border border-white group/btn"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#2444eb]">
-                    add_circle
-                  </span>
-                  <span className="text-sm font-bold text-[#2c2a51]">
-                    Record Purchase
-                  </span>
-                </div>
-                <span className="material-symbols-outlined text-gray-300 group-hover/btn:text-[#2444eb] transition-colors">
-                  chevron_right
-                </span>
+        {/* Right Column */}
+        <div className="space-y-6 flex flex-col">
+          
+          {/* Actions */}
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+            <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h3>
+            <div className="flex flex-col gap-2">
+              <Link to="/purchase" className="w-full flex items-center justify-center gap-2 p-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-bold">
+                <Plus size={16} /> Record Purchase
               </Link>
-              <Link
-                to="/customers"
-                className="flex items-center justify-between p-4 bg-white rounded-2xl hover:shadow-lg hover:shadow-purple-900/5 transition-all border border-white group/btn"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#652fe7]">
-                    person_add
-                  </span>
-                  <span className="text-sm font-bold text-[#2c2a51]">
-                    Manage Customers
-                  </span>
-                </div>
-                <span className="material-symbols-outlined text-gray-300 group-hover/btn:text-[#652fe7] transition-colors">
-                  chevron_right
-                </span>
+              <Link to="/customers" className="w-full flex items-center justify-center gap-2 p-2.5 bg-white border border-gray-200 text-gray-900 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold">
+                <UserPlus size={16} /> Add Customer
               </Link>
             </div>
           </div>
 
-          {/* Recent Redemptions List (Recent Activity) */}
-          <div className="bg-white rounded-3xl p-8 luminous-shadow mt-auto border border-white/50">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <h3 className="text-lg font-headline font-black text-[#2c2a51]">
-                  Recent Redemptions
-                </h3>
-                <button
-                  onClick={() => setIsRedemptionsCollapsed(!isRedemptionsCollapsed)}
-                  className="p-1 rounded bg-gray-50 text-gray-400 hover:text-[#2444eb] transition-all"
-                >
-                  <span
-                    className={`material-symbols-outlined text-xs transition-transform duration-300 block ${
-                      isRedemptionsCollapsed ? "rotate-180" : ""
-                    }`}
-                  >
-                    keyboard_arrow_down
-                  </span>
-                </button>
-              </div>
+          {/* Redemptions */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-base font-bold text-gray-900">Recent Redemptions</h3>
+              <button 
+                onClick={() => setIsRedemptionsCollapsed(!isRedemptionsCollapsed)}
+                className="text-gray-400 hover:text-gray-900"
+              >
+                <ChevronDown size={18} className={`transition-transform duration-300 ${isRedemptionsCollapsed ? 'rotate-180' : ''}`} />
+              </button>
             </div>
 
             {!isRedemptionsCollapsed && (
-              <>
-                <div className="space-y-6 min-h-[300px]">
-                  {redLoading ? (
-                    <div className="h-40 flex items-center justify-center text-gray-400 italic font-bold">
-                      Fetching redemptions...
-                    </div>
-                  ) : recentRedemptions.length === 0 ? (
-                    <div className="h-40 flex items-center justify-center text-gray-400 italic font-bold">
-                      No recent redemptions.
-                    </div>
-                  ) : (
-                    recentRedemptions.map((redemption) => (
-                      <div
-                        key={redemption.id}
-                        className="flex items-center justify-between group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-linear-to-br from-[#b60051]/5 to-[#652fe7]/5 flex items-center justify-center font-black text-[#b60051] border border-white shadow-sm ring-2 ring-transparent group-hover:ring-[#b60051]/10 transition-all">
-                            {redemption.customer_name?.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="text-sm font-black text-[#2c2a51] group-hover:text-[#b60051] transition-colors">
-                              {redemption.customer_name}
-                            </p>
-                            <p className="text-[10px] font-black text-[#5a5781] uppercase tracking-widest leading-none">
-                              Points Used
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-black text-rose-600">
-                            -{redemption.points_used?.toLocaleString()}{" "}
-                            <span className="opacity-50">pts</span>
-                          </p>
+              <div className="space-y-5">
+                {redLoading ? (
+                  <div className="text-center py-10 text-gray-400 text-xs italic">Syncing activity...</div>
+                ) : recentRedemptions.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 text-xs italic">No activity yet.</div>
+                ) : (
+                  recentRedemptions.map((red) => (
+                    <div key={red.id} className="flex items-start justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-gray-200 group-hover:bg-gray-900 transition-colors mt-1.5"></div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{red.customer_name}</p>
+                          <p className="text-[10px] text-gray-500 font-medium">{formatDate(red.created_at)} · {formatTime(red.created_at)}</p>
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
-
-                {redemptionTotal > 10 && (
-                  <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-[#5a5781] uppercase tracking-[0.2em]">
-                      Page {redemptionPage}
-                    </span>
-                    <div className="flex gap-2">
-                       <button 
-                         disabled={redemptionPage === 1 || redLoading}
-                         onClick={() => fetchRecentRedemptions(redemptionPage - 1)}
-                         className="p-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-[#2444eb] hover:bg-[#f3eeff] transition-all disabled:opacity-30"
-                       >
-                         <span className="material-symbols-outlined text-xs">arrow_back</span>
-                       </button>
-                       <button 
-                         disabled={recentRedemptions.length < 10 || (redemptionPage * 10 >= redemptionTotal) || redLoading}
-                         onClick={() => fetchRecentRedemptions(redemptionPage + 1)}
-                         className="p-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-[#2444eb] hover:bg-[#f3eeff] transition-all disabled:opacity-30"
-                       >
-                         <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                       </button>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-rose-600">-{red.points_used} <span className="text-[10px] text-gray-400 font-bold uppercase ml-0.5">pts</span></p>
+                      </div>
                     </div>
+                  ))
+                )}
+                
+                {redemptionTotal > 10 && !redLoading && (
+                  <div className="pt-4 border-t border-gray-50 flex justify-end gap-2">
+                     <button 
+                      disabled={redemptionPage === 1} 
+                      onClick={() => fetchRecentRedemptions(redemptionPage - 1)}
+                      className="p-1 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-30"
+                    >
+                      <ArrowRight size={12} className="rotate-180" />
+                    </button>
+                    <button 
+                      disabled={recentRedemptions.length < 10 || redemptionPage * 10 >= redemptionTotal}
+                      onClick={() => fetchRecentRedemptions(redemptionPage + 1)}
+                      className="p-1 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-30"
+                    >
+                      <ArrowRight size={12} />
+                    </button>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* Luminous Highlight Banner */}
-      <section className="bg-[#e3dfff] rounded-[40px] p-1.5 overflow-hidden relative animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
-        <div className="bg-white rounded-[34px] p-12 flex flex-col md:flex-row items-center gap-12 border border-white/50">
-          <div className="flex-1 space-y-6">
-            <span className="bg-[#ff8fa9]/20 text-[#b60051] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-[0.2em]">
-              New Feature
-            </span>
-            <h2 className="text-4xl font-headline font-black text-[#2c2a51] tracking-tight leading-tight">
-              Unlock AI-Driven <br /> Market Insights
+      {/* Enterprise Analytics Banner */}
+      <section className="">
+        <div className="relative overflow-hidden rounded-[2rem] bg-[#0A0A0B] text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-10 border border-gray-800 shadow-2xl">
+          <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+          
+          <div className="flex-1 space-y-6 relative z-10">
+            <div className="inline-flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">
+              <Sparkles size={14} className="text-gray-400" />
+              Lumina Enterprise
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+              Advanced AI <br /> Market Insights
             </h2>
-            <p className="text-[#5a5781] font-body text-lg leading-relaxed max-w-lg">
-              Discover hidden purchasing patterns and customer behavior with our
-              new advanced analytics suite. Treat your data like high-end
-              editorial content.
+            <p className="text-gray-400 text-sm leading-relaxed max-w-md font-medium">
+              Discover hidden purchasing patterns and forecast customer behavior with our new advanced analytics suite. Treat your data as your greatest asset.
             </p>
-            <button className="bg-[#2444eb] text-white px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:bg-gray-500 transition-all shadow-xl shadow-blue-500/25 active:scale-95 cursor-not-allowed">
-              Upgrade to Pro Tier
-            </button>
+            <div className="pt-2">
+              <button className="bg-white text-gray-900 px-6 py-3 rounded-xl text-sm font-bold hover:bg-gray-100 transition-all flex items-center gap-2 shadow-lg shadow-white/5 active:scale-95 cursor-not-allowed opacity-50">
+                Upgrade Workspace <ArrowUpRight size={16} />
+              </button>
+            </div>
           </div>
-          <div className="w-full md:w-1/3 relative">
-            <div className="absolute inset-0 bg-[#2444eb]/20 blur-3xl rounded-full"></div>
-            <img
-              alt="Data Analytics"
-              className="rounded-3xl shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700 relative z-10 border border-white/50"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUukxl4_eqy84XfAifJctNZk4wW2yl9_zM62Uaj5r7cCe7wL7GMBtSLZrTwk2AxUgL04BGwQ8bqKk2A3_xfZbI0H0kUR1L_hNtF5eQGPTB5WSbe4X9AGkZ3Rlojm6uCPuJZ-o4Wj81dKy7lFWPqIzUAZhQbdpSlid7tKuUMKF_IC837ayPp-etNa--EVk9I1mSZf2XhiX429-ATLKc73KdZ0qWg_kmQZ6VQORRzAmfwdKgT3Bqfjp1eUcLMfiwyFmtd62OMShqjHc"
-            />
+          
+          <div className="w-full md:w-auto relative z-10 flex justify-center md:justify-end">
+             <div className="w-[280px] h-[180px] rounded-2xl bg-gray-900/50 border border-gray-800 p-6 flex flex-col justify-end gap-3 relative overflow-hidden backdrop-blur-md shadow-2xl">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-indigo-500/10 blur-[80px]"></div>
+                
+                <div className="flex items-end gap-3 h-full w-full relative z-10">
+                   <div className="w-full bg-gray-800 rounded-lg h-[30%] hover:bg-gray-700 transition-all"></div>
+                   <div className="w-full bg-gray-700 rounded-lg h-[55%] hover:bg-gray-600 transition-all"></div>
+                   <div className="w-full bg-white rounded-lg h-[85%] relative group shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-gray-900 text-[10px] font-black px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        +85.2% INSIGHT
+                      </div>
+                   </div>
+                   <div className="w-full bg-gray-800 rounded-lg h-[40%] hover:bg-gray-700 transition-all"></div>
+                </div>
+             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 };

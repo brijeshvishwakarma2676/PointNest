@@ -2,6 +2,22 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { customersApi } from "../api";
+import { 
+  Users, 
+  Search, 
+  Plus, 
+  Eye, 
+  Pencil, 
+  CreditCard, 
+  X, 
+  UserPlus, 
+  ChevronLeft, 
+  ChevronRight,
+  ShieldCheck,
+  User,
+  ExternalLink,
+  History
+} from "lucide-react";
 
 const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
@@ -83,16 +99,12 @@ const CustomersPage = () => {
       const response = await customersApi.addCustomer(newCustomer);
       if (response.success) {
         if (response.data?.is_new_customer === false) {
-          // Customer already exists, show existing customer details overlay
           setExistingCustomer(response.data);
-          toast("Customer already exists", { icon: "ℹ️" });
         } else {
-          // Brand new customer
           toast.success("Customer added successfully!");
           setNewCustomer({ name: "", phone: "", email: "" });
           setIsModalOpen(false);
         }
-        // Refresh the customer list to show the latest points/data
         fetchCustomers(1);
       } else {
         toast.error(response.message || "Failed to add customer");
@@ -129,39 +141,25 @@ const CustomersPage = () => {
 
   const handleUpdateCustomer = async (e) => {
     e.preventDefault();
-
-    // Validation
     if (!selectedCustomer.name?.trim()) {
       toast.error("Name is required");
       return;
     }
-
-    if (!selectedCustomer.phone?.trim() && !selectedCustomer.email?.trim()) {
-      toast.error("At least one contact method (Phone or Email) is required");
-      return;
-    }
-
     setSubmitting(true);
     try {
-      // Construct payload based on requirements
       const payload = {
         id: selectedCustomer.id,
         name: selectedCustomer.name.trim(),
       };
-
-      if (selectedCustomer.phone?.trim())
-        payload.phone = selectedCustomer.phone.trim();
-      if (selectedCustomer.email?.trim())
-        payload.email = selectedCustomer.email.trim();
+      if (selectedCustomer.phone?.trim()) payload.phone = selectedCustomer.phone.trim();
+      if (selectedCustomer.email?.trim()) payload.email = selectedCustomer.email.trim();
 
       const response = await customersApi.updateCustomer(payload);
-
       if (response.success) {
         toast.success("Customer details updated successfully!");
         setIsEditingCustomer(false);
         setViewCustomerModal(false);
         setSelectedCustomer(null);
-        // Refresh the background list to reflect new data
         fetchCustomers(pagination.page);
       } else {
         toast.error(response.message || "Failed to update customer details");
@@ -174,190 +172,135 @@ const CustomersPage = () => {
   };
 
   return (
-    <div className="p-6 md:p-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen font-sans antialiased">
+      {/* Header Section */}
+      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 animate-in fade-in slide-in-from-top-4 duration-700">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-            Customers
+          <div className="inline-flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3">
+            <ShieldCheck size={12} />
+            Enterprise Registry
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-none mb-4">
+            Client <br />
+            <span className="text-gray-400">Management</span>
           </h1>
-          <p className="text-gray-500 mt-1 font-medium">
-            Manage your loyalty members
+          <p className="text-gray-500 font-medium max-w-md text-sm leading-relaxed">
+            Manage your high-value customers, audit loyalty point balances, and track interaction history.
           </p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="relative w-full sm:w-64 group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-gray-900 transition-colors">
+              <Search size={16} />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setPagination((prev) => ({ ...prev, page: 1 })); // Reset to page 1 on search
+                setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder="Search customers..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/60 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 text-sm shadow-sm"
+              placeholder="Search registry..."
+              className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white border border-gray-200 focus:border-gray-900 outline-none transition-all text-gray-900 text-sm font-bold placeholder-gray-300"
             />
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition-all font-semibold hover:-translate-y-0.5 whitespace-nowrap text-sm"
+            className="flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 py-4 bg-[#0A0A0B] text-white font-bold rounded-2xl hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-gray-200 whitespace-nowrap"
           >
-            <svg
-              className="w-5 h-5 hidden sm:block"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            Add Customer
+            <Plus size={18} />
+            Enroll Client
           </button>
         </div>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-xl shadow-lg shadow-gray-900/5 rounded-3xl border border-white/50 overflow-hidden">
-        <div className="overflow-x-auto w-full">
+      {/* Main Registry Table */}
+      <div className="bg-white rounded-[2.5rem] border border-gray-200 overflow-hidden shadow-2xl shadow-gray-200/50 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/30">
+          <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+            <Users size={14} className="text-gray-400" />
+            Active Records
+          </h2>
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            {pagination.total} VERIFIED CLIENTS
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
           <table className="w-full text-left whitespace-nowrap">
-            <thead className="bg-gray-50/50 border-b border-gray-100/60">
-              <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
-                  Points Balance
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
-                  Actions
-                </th>
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Client Profile</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Contact Protocol</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Loyalty Yield</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Interaction</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100/60">
+            <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="px-6 py-12 text-center text-gray-500 font-medium"
-                  >
-                    Loading customers...
-                  </td>
-                </tr>
+                [...Array(6)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td colSpan="4" className="px-10 py-7">
+                      <div className="h-4 bg-gray-100 rounded-full w-1/3"></div>
+                    </td>
+                  </tr>
+                ))
               ) : customers.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="4"
-                    className="px-6 py-12 text-center text-gray-500 font-medium"
-                  >
-                    No customers found. Click 'Add Customer' to start building
-                    your loyalty base!
+                  <td colSpan="4" className="px-10 py-32 text-center">
+                     <div className="flex flex-col items-center gap-4 opacity-30">
+                      <Search size={48} className="text-gray-400" />
+                      <p className="text-lg font-black text-gray-400 uppercase tracking-tighter">
+                        No Records Found
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 customers.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="hover:bg-white/40 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 shrink-0 bg-linear-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center font-bold text-gray-600 border border-white">
-                          {customer.name
-                            ? customer.name.charAt(0).toUpperCase()
-                            : "?"}
+                  <tr key={customer.id} className="group hover:bg-gray-50/50 transition-all duration-300">
+                    <td className="px-10 py-7">
+                      <div className="flex items-center gap-5">
+                        <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center font-bold text-gray-900 border border-gray-200 group-hover:bg-white group-hover:shadow-md transition-all">
+                          {customer.name?.charAt(0).toUpperCase() || "?"}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            {customer.name}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            ID: #{customer.id}
-                          </p>
+                          <p className="font-bold text-gray-900 text-base mb-0.5">{customer.name}</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">U-ID: #{customer.id}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-900">{customer.phone}</p>
-                      <p className="text-xs text-gray-500">
-                        {customer.email || "No email"}
+                    <td className="px-10 py-7">
+                      <p className="text-sm font-bold text-gray-900 mb-0.5">{customer.phone}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate max-w-[150px]">
+                        {customer.email || "No Email"}
                       </p>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800">
-                        {customer.points}
-                      </span>
+                    <td className="px-10 py-7 text-right">
+                       <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-50 text-gray-900 border border-gray-200 text-xs font-black shadow-sm group-hover:bg-[#0A0A0B] group-hover:text-white group-hover:border-[#0A0A0B] transition-all">
+                        {customer.points} <span className="text-[9px] opacity-60 uppercase">pts</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-10 py-7 text-right">
+                      <div className="flex items-center justify-end gap-3">
                         <button
                           onClick={() => handleViewCustomer(customer.id, false)}
-                          title="View Customer"
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
+                          <Eye size={18} />
                         </button>
                         <button
                           onClick={() => handleViewCustomer(customer.id, true)}
-                          title="Edit Customer"
-                          className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                          className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            />
-                          </svg>
+                          <Pencil size={18} />
                         </button>
                         <Link
                           to={`/purchase?phone=${customer.phone}`}
-                          className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100 shadow-sm ml-2"
+                          className="ml-2 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95"
                         >
-                          Issue Points
+                          Issue Yield
                         </Link>
                       </div>
                     </td>
@@ -368,190 +311,147 @@ const CustomersPage = () => {
           </table>
         </div>
 
-        {/* Pagination minimal UI */}
+        {/* Pagination Footer */}
         {!loading && customers.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-100/60 flex items-center justify-between">
-            <span className="text-sm text-gray-500 font-medium">
-              Total Customers:{" "}
-              <span className="font-bold text-gray-900">
-                {pagination.total}
-              </span>
-            </span>
-            <div className="flex gap-2">
+          <div className="px-10 py-8 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between">
+             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+              PAGE {pagination.page} OF {Math.ceil(pagination.total / pagination.size)}
+            </div>
+            
+            <div className="flex gap-3">
               <button
                 disabled={pagination.page <= 1}
                 onClick={() => fetchCustomers(pagination.page - 1)}
-                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+                 className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 text-xs font-bold hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
               >
+                <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
                 Previous
               </button>
               <button
                 disabled={customers.length < pagination.size}
                 onClick={() => fetchCustomers(pagination.page + 1)}
-                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+                 className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 text-xs font-bold hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
               >
                 Next
+                <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Add Customer Modal Overlay */}
+      {/* Enrollment Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/60 w-full max-w-md overflow-hidden transform transition-all relative">
-            <div className="px-6 py-5 border-b border-gray-100/60 flex justify-between items-center bg-white/50">
-              <h3 className="text-lg font-bold text-gray-900">
-                {existingCustomer ? "Customer Details" : "Add New Customer"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#0A0A0B]/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-200 w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <UserPlus size={16} className="text-gray-400" />
+                {existingCustomer ? "Registry Hit" : "Client Enrollment"}
               </h3>
               <button
                 onClick={() => {
                   setIsModalOpen(false);
-                  setTimeout(() => setExistingCustomer(null), 300); // Reset after animation
+                  setTimeout(() => setExistingCustomer(null), 300);
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X size={20} />
               </button>
             </div>
 
             {existingCustomer ? (
-              <div className="p-8 text-center animate-in fade-in zoom-in duration-300">
-                <div className="w-20 h-20 mx-auto bg-linear-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-sm font-bold text-indigo-700 text-2xl">
+              <div className="p-10 text-center animate-in fade-in zoom-in-95 duration-300">
+                <div className="w-24 h-24 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center mb-6 border border-gray-200 shadow-sm font-black text-3xl text-gray-900">
                   {existingCustomer.name.charAt(0).toUpperCase()}
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-1">
+                <h4 className="text-2xl font-black text-gray-900 mb-2">
                   {existingCustomer.name}
                 </h4>
-                <p className="text-gray-500 font-medium mb-6">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-8">
                   {existingCustomer.phone}
                 </p>
-                <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 mb-8">
-                  <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-1">
-                    Current Points
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 tracking-tight">
-                    {existingCustomer.points}
+                
+                <div className="bg-gray-50 border border-gray-100 rounded-3xl p-6 mb-10 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Enterprise Balance</p>
+                  <p className="text-4xl font-black text-black tracking-tighter">
+                    {existingCustomer.points} <span className="text-xs text-gray-400">PTS</span>
                   </p>
                 </div>
-                <div className="flex flex-col gap-3">
+                
+                <div className="grid grid-cols-1 gap-4">
                   <Link
                     to={`/purchase?phone=${existingCustomer.phone}`}
-                    className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                    className="w-full flex items-center justify-center gap-3 bg-[#0A0A0B] text-white py-4 rounded-2xl font-bold text-base hover:bg-gray-800 transition-all shadow-xl shadow-gray-200"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                    Issue New Points
+                    <History size={18} />
+                    Issue New Yield
                   </Link>
                   <button
                     onClick={() => {
                       setExistingCustomer(null);
                       setNewCustomer({ name: "", phone: "", email: "" });
                     }}
-                    className="w-full py-3.5 px-4 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    className="w-full py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-50 transition-colors text-sm"
                   >
-                    Add a Different Customer
+                    Add Different Client
                   </button>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleAddCustomer} className="p-6">
-                <div className="space-y-5">
+              <form onSubmit={handleAddCustomer} className="p-8">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Full Name
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                      Full Legal Name
                     </label>
                     <input
                       type="text"
                       value={newCustomer.name}
-                      onChange={(e) =>
-                        setNewCustomer({ ...newCustomer, name: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800"
-                      placeholder="e.g. John Doe"
+                      onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                      className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base"
+                      placeholder="e.g. Alexander Pierce"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Phone Number
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                      Protocol Address (Phone)
                     </label>
                     <input
                       type="tel"
                       maxLength={10}
-                      pattern="[0-9]{10}"
                       value={newCustomer.phone}
                       onChange={(e) => {
-                        const val = e.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 10);
-                        setNewCustomer({
-                          ...newCustomer,
-                          phone: val,
-                        });
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setNewCustomer({ ...newCustomer, phone: val });
                       }}
-                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800"
-                      placeholder="e.g. 9999999999"
+                       className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base"
+                      placeholder="9988776655"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Email Address (Optional)
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                      Email Link (Optional)
                     </label>
                     <input
                       type="email"
                       value={newCustomer.email}
-                      onChange={(e) =>
-                        setNewCustomer({
-                          ...newCustomer,
-                          email: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800"
-                      placeholder="e.g. john@example.com"
+                      onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                       className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base"
+                      placeholder="alex@lumina.io"
                     />
                   </div>
                 </div>
 
-                <div className="mt-8 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
+                <div className="mt-10">
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full bg-[#0A0A0B] text-white py-5 rounded-2xl font-bold text-base shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-30"
                   >
-                    {submitting ? "Saving..." : "Save Customer"}
+                    {submitting ? "Enrolling..." : "Complete Enrollment"}
                   </button>
                 </div>
               </form>
@@ -560,177 +460,116 @@ const CustomersPage = () => {
         </div>
       )}
 
-      {/* View/Edit Customer Modal */}
+      {/* View/Edit Modal */}
       {viewCustomerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/60 w-full max-w-md overflow-hidden transform transition-all relative">
-            <div className="px-6 py-5 border-b border-gray-100/60 flex justify-between items-center bg-white/50">
-              <h3 className="text-lg font-bold text-gray-900">
-                {isEditingCustomer ? "Edit Customer" : "Customer Details"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#0A0A0B]/60 backdrop-blur-sm animate-in fade-in duration-300">
+           <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-200 w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300">
+            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <User size={16} className="text-gray-400" />
+                {isEditingCustomer ? "Modify Record" : "Client Dossier"}
               </h3>
               <button
                 onClick={() => {
                   setViewCustomerModal(false);
                   setSelectedCustomer(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-full hover:bg-gray-100"
+                 className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X size={20} />
               </button>
             </div>
 
             {fetchingDetails ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center">
-                <svg
-                  className="animate-spin h-8 w-8 text-blue-500 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <p className="text-gray-500 font-medium">Loading details...</p>
+              <div className="p-16 text-center flex flex-col items-center justify-center">
+                 <Loader2 className="animate-spin text-gray-900 mb-4" size={32} />
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Querying Registry...</p>
               </div>
             ) : selectedCustomer ? (
-              <form onSubmit={handleUpdateCustomer} className="p-6">
-                <div className="text-center mb-6">
-                  <div className="h-16 w-16 mx-auto bg-linear-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center font-bold text-2xl text-blue-600 border border-white shadow-sm mb-3">
-                    {selectedCustomer.name
-                      ? selectedCustomer.name.charAt(0).toUpperCase()
-                      : "?"}
+              <form onSubmit={handleUpdateCustomer} className="p-8">
+                <div className="text-center mb-10">
+                  <div className="h-20 w-20 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center font-black text-2xl text-gray-900 border border-gray-200 shadow-sm mb-4">
+                    {selectedCustomer.name?.charAt(0).toUpperCase() || "?"}
                   </div>
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                    ID: #{selectedCustomer.id}
-                  </p>
+                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-50 border border-gray-200 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                    SYSTEM ID: #{selectedCustomer.id}
+                  </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Full Name
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                      Legal Name
                     </label>
                     <input
                       type="text"
                       value={selectedCustomer.name || ""}
-                      onChange={(e) =>
-                        setSelectedCustomer({
-                          ...selectedCustomer,
-                          name: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setSelectedCustomer({ ...selectedCustomer, name: e.target.value })}
                       disabled={!isEditingCustomer}
-                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
+                      className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base disabled:opacity-50"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Phone Number
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                      Contact Protocol
                     </label>
                     <input
                       type="tel"
                       maxLength={10}
                       value={selectedCustomer.phone || ""}
                       onChange={(e) => {
-                        const val = e.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 10);
-                        setSelectedCustomer({
-                          ...selectedCustomer,
-                          phone: val,
-                        });
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setSelectedCustomer({ ...selectedCustomer, phone: val });
                       }}
                       disabled={!isEditingCustomer}
-                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
+                      className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base disabled:opacity-50"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Email Address
+                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1 text-right">
+                      Yield Balance
                     </label>
-                    <input
-                      type="email"
-                      value={selectedCustomer.email || ""}
-                      onChange={(e) =>
-                        setSelectedCustomer({
-                          ...selectedCustomer,
-                          email: e.target.value,
-                        })
-                      }
-                      disabled={!isEditingCustomer}
-                      className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Points Balance
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedCustomer.points || 0}
-                      disabled
-                      className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-transparent text-gray-600 font-bold cursor-not-allowed"
-                    />
+                    <div className="w-full px-5 py-4 rounded-2xl bg-[#0A0A0B] text-white flex justify-between items-center">
+                       <CreditCard size={18} className="text-gray-500" />
+                       <span className="font-black text-xl tracking-tighter">{selectedCustomer.points}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-8 flex gap-3">
+                <div className="mt-10 flex flex-col gap-3">
+                   {isEditingCustomer && (
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full bg-[#0A0A0B] text-white py-5 rounded-2xl font-bold text-base shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-30"
+                    >
+                      {submitting ? "Updating Dossier..." : "Verify & Authorize"}
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
                       setViewCustomerModal(false);
                       setSelectedCustomer(null);
                     }}
-                    className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    className="w-full py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-50 transition-colors text-sm"
                   >
-                    Close
+                    Close Dossier
                   </button>
-                  {isEditingCustomer && (
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md shadow-amber-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                      {submitting ? "Updating..." : "Update Details"}
-                    </button>
-                  )}
                 </div>
               </form>
             ) : (
-              <div className="p-8 text-center text-gray-500">
-                Failed to load customer details.
+              <div className="p-16 text-center text-[10px] font-black text-rose-500 uppercase tracking-widest">
+                Data Stream Corrupted
               </div>
             )}
-          </div>
+           </div>
         </div>
       )}
     </div>
   );
 };
 
-// Force Vite HMR reload
 export default CustomersPage;

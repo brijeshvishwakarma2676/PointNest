@@ -2,7 +2,23 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/authStore";
 import toast from "react-hot-toast";
+import { 
+  ShieldCheck, 
+  Store, 
+  User, 
+  Mail, 
+  Phone, 
+  Lock, 
+  ChevronRight, 
+  ExternalLink,
+  Info,
+  RefreshCw
+} from "lucide-react";
 
+/**
+ * RegisterPage - Lumina Noir Edition
+ * A high-impact enrollment terminal for new enterprises.
+ */
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { register, isLoading, error, clearError } = useAuthStore();
@@ -28,131 +44,198 @@ const RegisterPage = () => {
       return;
     }
 
-    // Remove confirm_password before sending to API
-    // eslint-disable-next-line no-unused-vars
     const { confirm_password, ...submitData } = formData;
-
     const result = await register(submitData);
 
     if (result.success) {
-      toast.success(result.message || "Registration successful!");
-      // Send them to login page after successful registration
+      toast.success(result.message || "Enrollment successful");
       navigate("/");
     } else {
-      toast.error(result.message || "Registration failed");
+      toast.error(result.message || "Enrollment failed");
     }
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-100 font-sans">
-      {/* Background iOS-style blurry blobs */}
-      <div className="absolute top-[-20%] left-[10%] h-[700px] w-[700px] rounded-full bg-cyan-300 opacity-50 mix-blend-multiply blur-[120px]"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] h-[600px] w-[600px] rounded-full bg-blue-500 opacity-40 mix-blend-multiply blur-[120px]"></div>
-      <div className="absolute top-[30%] left-[-10%] h-[500px] w-[500px] rounded-full bg-purple-400 opacity-40 mix-blend-multiply blur-[100px]"></div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0A0A0B] font-sans antialiased text-white py-12">
+      {/* Structural Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-white/[0.01] rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-white/[0.015] rounded-full blur-[100px]" />
+      </div>
 
-      {/* Glassmorphism Card */}
-      <div className="relative z-10 w-full max-w-[500px] mx-4 md:mx-0 p-8 sm:p-10 rounded-[2.5rem] bg-white/40 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)]">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
-            Create Account
-          </h2>
-          <p className="mt-2 text-gray-600 font-medium">Join PointNest today</p>
+      <div className="relative z-10 w-full max-w-[580px] mx-6 animate-in fade-in zoom-in-95 duration-700">
+        {/* Terminal Header */}
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white text-black border border-gray-200 shadow-2xl">
+             <Store size={36} strokeWidth={2.5} />
+          </div>
+          <div className="inline-flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-3">
+             Entity Registration Protocol
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter text-white mb-2 italic">
+            ENROLLMENT
+          </h1>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            Establish a new enterprise terminal
+          </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm mb-4">
-              {error}
+        {/* Form Container */}
+        <div className="bg-[#111113] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest mb-6 flex items-center gap-3">
+                <Info size={14} />
+                {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Enterprise Name</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                    <Store size={16} />
+                  </div>
+                  <input
+                    type="text"
+                    name="shop_name"
+                    placeholder="Lumina HQ"
+                    value={formData.shop_name}
+                    onChange={handleChange}
+                    className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Admin Identity</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                    <User size={16} />
+                  </div>
+                  <input
+                    type="text"
+                    name="owner_name"
+                    placeholder="Alexander P."
+                    value={formData.owner_name}
+                    onChange={handleChange}
+                    className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                    required
+                  />
+                </div>
+              </div>
             </div>
-          )}
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="shop_name"
-              placeholder="Shop Name"
-              value={formData.shop_name}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-            <input
-              type="text"
-              name="owner_name"
-              placeholder="Owner Name"
-              value={formData.owner_name}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
+
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Access Protocol (Email)</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                  <Mail size={16} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="admin@lumina.io"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Primary Communication Link (Phone)</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                  <Phone size={16} />
+                </div>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="9988776655"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Secure Key</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                    <Lock size={16} />
+                  </div>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Confirm Key</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
+                    <Lock size={16} />
+                  </div>
+                  <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="••••••••"
+                    value={formData.confirm_password}
+                    onChange={handleChange}
+                    className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="mt-6 w-full flex items-center justify-center gap-3 py-6 rounded-2xl bg-white text-black font-black uppercase tracking-[0.2em] text-xs hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-20 shadow-xl"
+            >
+              {isLoading ? (
+                <RefreshCw className="animate-spin" size={18} />
+              ) : (
+                <>
+                  Authorize Registration
+                  <ChevronRight size={18} strokeWidth={3} />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-12 pt-8 border-t border-white/5 text-center text-sm font-medium text-gray-600">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
+              Already a verified partner?
+            </p>
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-2xl border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/[0.03] transition-all"
+            >
+              Sign In to Connection
+              <ExternalLink size={12} />
+            </Link>
           </div>
+        </div>
 
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-          </div>
-
-          <div>
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone Number"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-            <input
-              type="password"
-              name="confirm_password"
-              placeholder="Confirm Password"
-              value={formData.confirm_password}
-              onChange={handleChange}
-              className="w-full px-5 py-4 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all text-gray-800 placeholder-gray-500 shadow-sm font-medium"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`mt-6 w-full rounded-2xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-4 text-base font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              isLoading
-                ? "opacity-70 cursor-not-allowed"
-                : "cursor-pointer shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5"
-            }`}
-          >
-            {isLoading ? "Signing Up..." : "Sign Up"}
-          </button>
-        </form>
-
-        <p className="mt-8 text-center text-sm font-medium text-gray-600">
-          Already have an account?{" "}
-          <Link
-            to="/"
-            className="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            Sign in
-          </Link>
-        </p>
+        {/* Global Footer */}
+        <div className="mt-12 text-center pb-8">
+           <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
+            Identity Proxy © 2026 Lumina Group
+          </p>
+        </div>
       </div>
     </div>
   );

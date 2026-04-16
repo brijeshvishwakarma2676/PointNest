@@ -99,9 +99,9 @@ const useAuthStore = create(
       },
 
       // Fetch/Refresh User Profile Data
-      refreshProfile: async () => {
+      refreshProfile: async (date_filter = "all") => {
         try {
-          const userResponse = await authApi.getMe();
+          const userResponse = await authApi.getMe(date_filter);
           set({
             user: userResponse.data || userResponse,
           });
