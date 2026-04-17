@@ -22,7 +22,8 @@ import {
   Check,
   Percent,
   ShoppingBag,
-  Users
+  Users,
+  Layers
 } from "lucide-react";
 
 /**
@@ -100,7 +101,8 @@ const CouponsPage = () => {
     expiry: "",
     max_usage: "100",
     min_order: "0",
-    eligibility: "all"
+    eligibility: "all",
+    is_stackable: false
   });
 
   const handleMintVoucher = (e) => {
@@ -123,7 +125,8 @@ const CouponsPage = () => {
       expiry: "", 
       max_usage: "100",
       min_order: "0",
-      eligibility: "all"
+      eligibility: "all",
+      is_stackable: false
     });
   };
 
@@ -454,6 +457,40 @@ const CouponsPage = () => {
                       <option value="inactive">Re-engagement</option>
                     </select>
                   </div>
+                </div>
+
+                <div className="pt-2">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1 flex items-center gap-2">
+                    <Layers size={12} className="text-gray-300" />
+                    Stackable with other Coupons?
+                  </label>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setNewVoucher({...newVoucher, is_stackable: true})}
+                      className={`flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                        newVoucher.is_stackable 
+                        ? 'bg-[#0A0A0B] text-white border-transparent shadow-lg shadow-gray-200' 
+                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
+                      }`}
+                    >
+                      Yes, Allow Stacking
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewVoucher({...newVoucher, is_stackable: false})}
+                      className={`flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                        !newVoucher.is_stackable 
+                        ? 'bg-[#0A0A0B] text-white border-transparent shadow-lg shadow-gray-200' 
+                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
+                      }`}
+                    >
+                      No, Single Use Only
+                    </button>
+                  </div>
+                  <p className="mt-3 px-1 text-[9px] text-gray-400 font-medium italic">
+                    If enabled, this coupon can be applied even if other vouchers are already active in the cart.
+                  </p>
                 </div>
               </div>
 
