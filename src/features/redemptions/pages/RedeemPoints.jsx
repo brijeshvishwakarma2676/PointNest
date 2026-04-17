@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useSearchParams } from "react-router-dom";
 import { redemptionsApi } from "../api";
 import { 
   Gift, 
@@ -11,7 +12,9 @@ import {
   RefreshCw,
   User,
   ArrowDownLeft,
-  Check
+  Check,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 
 /**
@@ -19,12 +22,49 @@ import {
  * A high-impact redemption terminal with a minimalist enterprise aesthetic.
  */
 const RedeemPoints = () => {
-  const [form, setForm] = useState({ phone: "", points_to_redeem: "" });
+  const [searchParams] = useSearchParams();
+  const initialPhone = searchParams.get("phone") || "";
+
+  const [form, setForm] = useState({ phone: initialPhone, points_to_redeem: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [customerData, setCustomerData] = useState(null);
   const [result, setResult] = useState(null);
 
+  useEffect(() => {
+    if (initialPhone && initialPhone.length === 10) {
+      verifyClient(initialPhone);
+    }
+  }, [initialPhone]);
+
+  const verifyClient = async (phone) => {
+    if (phone.length !== 10) return;
+    setVerifying(true);
+    try {
+      const { customersApi } = await import("../../customers/api");
+      const response = await customersApi.getCustomerDetails({ phone });
+      if (response.success && response.data) {
+        setCustomerData(response.data);
+      } else {
+        setCustomerData(null);
+      }
+    } catch (error) {
+      setCustomerData(null);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    const sanitizedValue = name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value;
+    setForm((prev) => ({ ...prev, [name]: sanitizedValue }));
+    
+    if (name === "phone" && sanitizedValue.length === 10) {
+      verifyClient(sanitizedValue);
+    } else if (name === "phone") {
+      setCustomerData(null);
+    }
   };
 
   const handleReset = () => {
@@ -150,6 +190,34 @@ const RedeemPoints = () => {
             className="bg-white rounded-[2.5rem] border border-gray-200 p-10 shadow-2xl shadow-gray-200/50"
           >
             <div className="space-y-8">
+              {/* Identified Client Card */}
+              { (customerData || verifying) && (
+                <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100 flex items-center justify-between animate-in fade-in zoom-in duration-500">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center text-lg font-black text-gray-900 shadow-sm">
+                      {verifying ? (
+                        <Loader2 className="animate-spin text-gray-400" size={20} />
+                      ) : (
+                        customerData?.name?.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Identified Client</p>
+                      <p className="font-black text-gray-900">
+                        {verifying ? "Auditing Registry..." : customerData?.name}
+                      </p>
+                    </div>
+                  </div>
+                  {!verifying && (
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Avail Yield</p>
+                      <p className="font-black text-emerald-600 text-lg">
+                        {customerData?.points} <span className="text-[10px] opacity-60">PTS</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
               {/* Protocol ID (Phone) */}
               <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-1">

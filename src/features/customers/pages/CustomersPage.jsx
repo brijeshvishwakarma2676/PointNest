@@ -291,17 +291,17 @@ const CustomersPage = () => {
                         >
                           <Eye size={18} />
                         </button>
-                        <button
-                          onClick={() => handleViewCustomer(customer.id, true)}
-                          className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
-                        >
-                          <Pencil size={18} />
-                        </button>
                         <Link
                           to={`/purchase?phone=${customer.phone}`}
                           className="ml-2 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95"
                         >
-                          Issue Yield
+                          Add Purchase
+                        </Link>
+                        <Link
+                          to={`/redeem?phone=${customer.phone}`}
+                          className="ml-2 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95"
+                        >
+                          Redeem Points
                         </Link>
                       </div>
                     </td>
@@ -470,15 +470,27 @@ const CustomersPage = () => {
                 <User size={16} className="text-gray-400" />
                 {isEditingCustomer ? "Modify Record" : "Client Dossier"}
               </h3>
-              <button
-                onClick={() => {
-                  setViewCustomerModal(false);
-                  setSelectedCustomer(null);
-                }}
-                 className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {!isEditingCustomer && (
+                  <button
+                    onClick={() => setIsEditingCustomer(true)}
+                    className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100 flex items-center gap-2"
+                    title="Modify Record"
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Modify</span>
+                    <Pencil size={18} />
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setViewCustomerModal(false);
+                    setSelectedCustomer(null);
+                  }}
+                   className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {fetchingDetails ? (
@@ -544,9 +556,16 @@ const CustomersPage = () => {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="w-full bg-[#0A0A0B] text-white py-5 rounded-2xl font-bold text-base shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-30"
+                      className="w-full bg-[#0A0A0B] text-white py-5 rounded-2xl font-bold text-base shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3"
                     >
-                      {submitting ? "Updating Dossier..." : "Verify & Authorize"}
+                      {submitting ? (
+                        <Loader2 className="animate-spin" size={18} />
+                      ) : (
+                        <>
+                          <ShieldCheck size={18} />
+                          Verify & Authorize
+                        </>
+                      )}
                     </button>
                   )}
                   <button

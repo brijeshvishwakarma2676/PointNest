@@ -21,7 +21,8 @@ import {
   Phone,
   Clock,
   ArrowDownLeft,
-  ChevronDown
+  ChevronDown,
+  AlertCircle
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 
@@ -37,6 +38,7 @@ const Layout = ({ children }) => {
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   
   // Interactive Component State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -151,7 +153,7 @@ const Layout = ({ children }) => {
             )}
             
             <button
-              onClick={logout}
+              onClick={() => setIsLogoutModalOpen(true)}
               className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-gray-400 font-black text-[9px] uppercase tracking-[0.2em] border border-transparent hover:border-rose-500/10 hover:bg-rose-50 hover:text-rose-600 transition-all"
             >
               <LogOut size={14} />
@@ -318,6 +320,44 @@ const Layout = ({ children }) => {
               >
                 Close Connection
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+          <div
+            className="absolute inset-0 bg-[#0A0A0B]/60 backdrop-blur-md animate-in fade-in duration-500"
+            onClick={() => setIsLogoutModalOpen(false)}
+          ></div>
+          <div className="relative bg-white border border-gray-200 shadow-2xl rounded-[3rem] w-full max-w-sm overflow-hidden z-[120] animate-in zoom-in-95 duration-400">
+            <div className="p-10 text-center">
+              <div className="w-20 h-20 mx-auto bg-rose-50 rounded-[2rem] flex items-center justify-center mb-6 border border-rose-100 text-rose-500">
+                <AlertCircle size={40} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">
+                Terminate Session?
+              </h3>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-10 max-w-[200px] mx-auto">
+                Once terminated, you will need to re-verify your credentials to access the terminal.
+              </p>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={logout}
+                  className="w-full py-5 rounded-2xl bg-[#0A0A0B] text-white text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-rose-600 transition-all shadow-xl shadow-gray-200"
+                >
+                  Terminate Connection
+                </button>
+                <button
+                  onClick={() => setIsLogoutModalOpen(false)}
+                  className="w-full py-5 rounded-2xl bg-gray-50 text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-gray-100 transition-all"
+                >
+                  Stay Connected
+                </button>
+              </div>
             </div>
           </div>
         </div>
