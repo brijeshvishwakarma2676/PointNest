@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Plus,
   Loader2,
-  Check
+  Check,
+  ChevronRight
 } from "lucide-react";
 
 const AddPurchase = () => {
@@ -22,6 +23,8 @@ const AddPurchase = () => {
   const [purchase, setPurchase] = useState({ phone: initialPhone, amount: "" });
   const [submitting, setSubmitting] = useState(false);
   const [notFoundModal, setNotFoundModal] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [customerData, setCustomerData] = useState(null);
   const [newCustomer, setNewCustomer] = useState({ phone: "", name: "" });
   const [submittingCustomer, setSubmittingCustomer] = useState(false);
 
@@ -37,49 +40,60 @@ const AddPurchase = () => {
       return;
     }
 
+    const amountNum = parseFloat(purchase.amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Step 1: Verify Customer Identity
+      const { customersApi } = await import("../../customers/api");
+      const response = await customersApi.getCustomerDetails({ phone: purchase.phone });
+
+      if (response.success && response.data) {
+        setCustomerData(response.data);
+        setSubmitting(false); // Release the button state before opening modal
+        setIsConfirming(true);
+      } else {
+        // Fallback for missing client
+        setNotFoundModal(true);
+        setNewCustomer({ phone: purchase.phone, name: "" });
+      }
+    } catch (error) {
+      if (error.response?.status === 404 || error.message?.includes("not found")) {
+        setNotFoundModal(true);
+        setNewCustomer({ phone: purchase.phone, name: "" });
+      } else {
+        toast.error("Verification protocol failed. Please try again.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const executeTransaction = async () => {
     setSubmitting(true);
     try {
       const amountNum = parseFloat(purchase.amount);
-      if (isNaN(amountNum) || amountNum <= 0) {
-        toast.error("Please enter a valid amount");
-        setSubmitting(false);
-        return;
-      }
-
       const response = await purchasesApi.addPurchase(
         purchase.phone,
         amountNum,
       );
 
-      if (
-        response.success === false &&
-        response.message?.includes("Customer not found")
-      ) {
-        setNotFoundModal(true);
-        setNewCustomer({ phone: purchase.phone, name: "" });
-        return;
-      }
-
-      if (
-        response.success ||
-        response.message?.includes("success") ||
-        response.id
-      ) {
+      if (response.success || response.id) {
         toast.success(
-          `Successfully recorded purchase of ₹${amountNum} for ${purchase.phone}`,
+          `Successfully recorded purchase of ₹${amountNum} for ${customerData?.name || purchase.phone}`,
         );
         setPurchase({ phone: "", amount: "" });
+        setIsConfirming(false);
         navigate("/dashboard");
       } else {
         toast.error(response.message || "Failed to record purchase");
       }
     } catch (error) {
-      if (error.message?.includes("Customer not found")) {
-        setNotFoundModal(true);
-        setNewCustomer({ phone: purchase.phone, name: "" });
-      } else {
-        toast.error(error.message || "Error recording purchase");
-      }
+      toast.error(error.message || "Error recording purchase");
     } finally {
       setSubmitting(false);
     }
@@ -270,6 +284,84 @@ const AddPurchase = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Overlay */}
+      {isConfirming && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#0A0A0B]/80 backdrop-blur-md animate-in fade-in duration-500">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-200 w-full max-w-lg overflow-hidden transform animate-in zoom-in-95 duration-400">
+            <div className="px-10 py-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Final Audit</span>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">
+                  Authorization Required
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsConfirming(false)}
+                className="text-gray-400 hover:text-gray-900 transition-colors p-2 rounded-2xl hover:bg-gray-100"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-10 space-y-10">
+              <div className="flex items-center gap-6 p-6 rounded-3xl bg-gray-50 border border-gray-100">
+                <div className="h-16 w-16 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center text-2xl font-black text-gray-900">
+                  {customerData?.name?.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Identified Client</p>
+                  <p className="text-xl font-black text-gray-900">{customerData?.name}</p>
+                  <p className="text-sm text-gray-500 font-bold">{customerData?.phone}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="p-6 rounded-3xl border border-gray-100 bg-white">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Magnitude</p>
+                  <p className="text-2xl font-black text-gray-900">₹{purchase.amount}</p>
+                </div>
+                <div className="p-6 rounded-3xl border border-gray-100 bg-white">
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Yield Points</p>
+                  <p className="text-2xl font-black text-indigo-600">
+                    +{Math.floor(parseFloat(purchase.amount) * 0.1) || 0}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100 flex gap-3">
+                 <AlertCircle className="text-amber-500 shrink-0" size={18} />
+                 <p className="text-[11px] text-amber-900/70 font-bold leading-relaxed">
+                   Review these metrics carefully. Once broadcasted, this transaction will be permanently recorded in the enterprise registry.
+                 </p>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setIsConfirming(false)}
+                  className="flex-1 px-6 py-5 rounded-2xl border border-gray-200 text-gray-500 font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeTransaction}
+                  disabled={submitting}
+                  className="flex-[2] bg-[#0A0A0B] hover:bg-gray-800 text-white px-6 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    <>
+                      Confirm & Broadcast
+                      <ChevronRight size={18} />
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

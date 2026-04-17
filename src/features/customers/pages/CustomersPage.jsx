@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   User,
   ExternalLink,
-  History
+  History,
+  Loader2
 } from "lucide-react";
 
 const CustomersPage = () => {
