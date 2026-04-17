@@ -11,6 +11,8 @@ import Layout from "../components/layout/Layout";
 import NotFound from "../pages/NotFound";
 import RedeemPoints from "../features/redemptions/pages/RedeemPoints";
 import PointsHistory from "../features/customers/pages/PointsHistory";
+import CouponsPage from "../features/coupons/pages/CouponsPage";
+import CouponUsagePage from "../features/coupons/pages/CouponUsagePage";
 
 // A wrapper component that checks for authentication
 const ProtectedRoute = ({ children }) => {
@@ -112,6 +114,22 @@ export default function Router() {
           element={
             <ProtectedRoute>
               <PointsHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coupons"
+          element={
+            <ProtectedRoute>
+              <CouponsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coupons/:id/usage"
+          element={
+            <ProtectedRoute>
+              <CouponUsagePage />
             </ProtectedRoute>
           }
         />

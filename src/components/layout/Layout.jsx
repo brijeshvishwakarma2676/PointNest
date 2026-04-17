@@ -22,7 +22,8 @@ import {
   Clock,
   ArrowDownLeft,
   ChevronDown,
-  AlertCircle
+  AlertCircle,
+  TicketPercent
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 
@@ -79,6 +80,7 @@ const Layout = ({ children }) => {
     { name: "Redeem Points", path: "/redeem", icon: CreditCard },
     { name: "Purchases", path: "/purchases", icon: Receipt },
     { name: "Redemptions", path: "/history", icon: History },
+    { name: "Coupons", path: "/coupons", icon: TicketPercent },
   ];
 
   const activePath = location.pathname;
