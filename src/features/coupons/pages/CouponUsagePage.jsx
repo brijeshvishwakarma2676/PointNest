@@ -18,71 +18,40 @@ import {
  * CouponUsagePage - Lumina Enterprise Edition
  * A dedicated audit terminal for deep-diving into specific voucher redemptions.
  */
+import { couponsApi } from "../api";
+import { toast } from "react-hot-toast";
+
+/**
+ * CouponUsagePage - Lumina Enterprise Edition
+ * A dedicated audit terminal for deep-diving into specific voucher redemptions.
+ */
 const CouponUsagePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  
-  // Mock Data (consistent with CouponsPage)
-  const mockCoupons = [
-    { 
-      id: 1, 
-      code: "LUMINA-WELCOME", 
-      type: "percentage", 
-      value: 15, 
-      status: "active", 
-      expiry: "2026-12-31", 
-      usage_count: 0,
-      max_usage: 100,
-      history: []
-    },
-    { 
-      id: 2, 
-      code: "PRIME-FIXED-500", 
-      type: "fixed", 
-      value: 500, 
-      status: "used", 
-      expiry: "2026-05-15", 
-      usage_count: 1,
-      max_usage: 1,
-      history: [{ name: "Alexander Pierce", id: "60001", used_at: "2026-04-16 14:22" }]
-    },
-    { 
-      id: 4, 
-      code: "SUMMER-YIELD", 
-      type: "percentage", 
-      value: 10, 
-      status: "active", 
-      expiry: "2026-08-30", 
-      usage_count: 12,
-      max_usage: 200,
-      history: [
-        { name: "Sarah Connor", id: "60042", used_at: "2026-04-17 09:10" },
-        { name: "John Doe", id: "60045", used_at: "2026-04-17 09:45" },
-        { name: "Kyle Reese", id: "60048", used_at: "2026-04-17 10:12" },
-        { name: "Ellen Ripley", id: "60052", used_at: "2026-04-17 11:30" },
-        { name: "Rick Deckard", id: "60055", used_at: "2026-04-17 12:05" },
-        { name: "Kevin Flynn", id: "60058", used_at: "2026-04-17 13:20" },
-        { name: "Leo S. Johnson", id: "60060", used_at: "2026-04-17 14:00" },
-        { name: "Laura Palmer", id: "60062", used_at: "2026-04-17 14:45" },
-        { name: "Cooper Dale", id: "60065", used_at: "2026-04-17 15:15" },
-        { name: "Norma Jennings", id: "60068", used_at: "2026-04-17 16:30" },
-        { name: "Shelly Johnson", id: "60070", used_at: "2026-04-17 17:00" },
-        { name: "Bobby Briggs", id: "60072", used_at: "2026-04-17 18:22" }
-      ]
-    }
-  ];
-
   const [coupon, setCoupon] = useState(null);
 
   useEffect(() => {
-    // Simulate API fetch delay
-    const timer = setTimeout(() => {
-      const found = mockCoupons.find(c => c.id.toString() === id);
-      setCoupon(found);
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    const fetchAuditTrail = async () => {
+      try {
+        setLoading(true);
+        const result = await couponsApi.getCouponDetail(id);
+        if (result.success) {
+          setCoupon(result.data);
+        } else {
+          toast.error(result.message || "Failed to authorize audit access");
+        }
+      } catch (error) {
+        console.error("Audit fetch error:", error);
+        toast.error("Critical: Protocol synchronization failure");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+       fetchAuditTrail();
+    }
   }, [id]);
 
   if (loading) {
@@ -154,7 +123,7 @@ const CouponUsagePage = () => {
       </div>
 
       {/* Usage Analytics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 flex items-center justify-between group overflow-hidden relative">
           <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12">
             <TrendingDown size={100} />
@@ -173,7 +142,9 @@ const CouponUsagePage = () => {
           </div>
           <div>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Verify Pulse</p>
-            <h3 className="text-3xl font-black text-emerald-600">Active</h3>
+            <h3 className={`text-3xl font-black uppercase ${coupon.status === 'active' ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {coupon.status}
+            </h3>
           </div>
         </div>
 
@@ -184,10 +155,55 @@ const CouponUsagePage = () => {
           <div>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Validity</p>
             <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">
-              {coupon.expiry}
+              {coupon.expiry_date ? new Date(coupon.expiry_date).toLocaleDateString() : 'Never'}
             </h3>
           </div>
         </div>
+      </div>
+
+      {/* Protocol Specification Panel */}
+      <div className="mb-12">
+         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 px-4">Protocol Specification</h4>
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Discount Cap</p>
+               <p className="text-lg font-black text-gray-900">{coupon.max_discount_cap ? `₹${coupon.max_discount_cap}` : 'No Cap'}</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Min Order Val</p>
+               <p className="text-lg font-black text-gray-900">₹{coupon.min_order_value || 0}</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Per User Cap</p>
+               <p className="text-lg font-black text-gray-900">{coupon.max_usage_per_user} Usage</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Stackable</p>
+               <p className={`text-lg font-black ${coupon.is_stackable ? 'text-emerald-600' : 'text-gray-400'}`}>
+                 {coupon.is_stackable ? 'Authorized' : 'Restricted'}
+               </p>
+            </div>
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Eligibility</p>
+               <p className="text-xs font-black text-gray-900 uppercase tracking-widest">{coupon.eligibility_type}</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Start Date</p>
+               <p className="text-xs font-black text-gray-900 uppercase tracking-widest">
+                 {coupon.start_date ? new Date(coupon.start_date).toLocaleDateString() : 'Instant'}
+               </p>
+            </div>
+            <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100/50">
+               <p className="text-[9px] font-bold text-gray-400 uppercase mb-2">Authorized At</p>
+               <p className="text-xs font-black text-gray-900 uppercase tracking-widest">
+                 {new Date(coupon.created_at).toLocaleDateString()}
+               </p>
+            </div>
+            <div className="p-6 rounded-3xl bg-[#0A0A0B] border border-gray-900">
+               <p className="text-[9px] font-bold text-gray-500 uppercase mb-2">Audit Registry</p>
+               <p className="text-xs font-black text-white uppercase tracking-widest italic">V-PRTCL #{coupon.id}</p>
+            </div>
+         </div>
       </div>
 
       {/* Main Redemption Ledger */}

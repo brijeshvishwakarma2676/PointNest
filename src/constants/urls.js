@@ -11,4 +11,5 @@ export default {
   points_redeem: "redemptions/redeem",
   redemptions_list: "redemptions",
   customer_points_history: "customers/ledger",
+  coupons: "coupons",
 };
