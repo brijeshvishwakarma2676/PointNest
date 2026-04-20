@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
@@ -34,10 +34,10 @@ import useAuthStore from "../../store/authStore";
  */
 const Layout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   
@@ -134,7 +134,10 @@ const Layout = ({ children }) => {
           <div className="p-6 mt-auto border-t border-gray-100 bg-gray-50/20">
             {user && (
               <button
-                onClick={() => setIsProfileOpen(true)}
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                  navigate("/profile");
+                }}
                 className="w-full flex items-center justify-between p-4 mb-4 rounded-2xl bg-white border border-gray-100 hover:border-gray-900/10 hover:shadow-xl hover:shadow-gray-200/50 transition-all text-left relative overflow-hidden group"
               >
                 <div className="flex items-center gap-3 relative z-10 overflow-hidden">
@@ -269,63 +272,6 @@ const Layout = ({ children }) => {
         </div>
       </main>
 
-      {/* Identity Protocol Modal */}
-      {isProfileOpen && user && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-500"
-            onClick={() => setIsProfileOpen(false)}
-          ></div>
-          <div className="relative bg-white border border-gray-200 shadow-[0_64px_128px_-32px_rgba(0,0,0,0.3)] rounded-[3rem] w-full max-w-md overflow-hidden z-10 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
-            
-            <div className="bg-[#0A0A0B] p-12 text-white text-center relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-8 opacity-5">
-                 <ShieldCheck size={160} />
-               </div>
-              <div className="inline-flex h-24 w-24 items-center justify-center rounded-[2.5rem] bg-white text-black text-4xl font-black border-4 border-white/10 shadow-2xl mb-6 relative z-10">
-                {user.owner_name?.charAt(0).toUpperCase() || "A"}
-              </div>
-              <h2 className="text-2xl font-black tracking-tight mb-2 relative z-10 italic uppercase tracking-tighter">
-                {user.owner_name}
-              </h2>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] relative z-10">
-                Lumina Global Identity
-              </p>
-            </div>
-
-            <div className="p-10 space-y-6 bg-white">
-                <div className="flex items-center gap-5 p-6 bg-gray-50 rounded-[2rem] border border-gray-100 group hover:border-gray-900/10 transition-all">
-                  <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm shrink-0 group-hover:scale-110 transition-transform">
-                    <Mail size={18} />
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Access Protocol</p>
-                    <p className="text-sm text-gray-900 font-bold truncate">{user.email || "VERIFIED ADDRESS"}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-5 p-6 bg-gray-50 rounded-[2rem] border border-gray-100 group hover:border-gray-900/10 transition-all">
-                  <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm shrink-0 group-hover:scale-110 transition-transform">
-                    <Phone size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Terminal Link</p>
-                    <p className="text-sm text-gray-900 font-bold">{user.phone}</p>
-                  </div>
-                </div>
-            </div>
-
-            <div className="p-10 pt-0">
-              <button
-                onClick={() => setIsProfileOpen(false)}
-                className="w-full py-5 rounded-2xl bg-[#0A0A0B] text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 active:scale-95"
-              >
-                Close Connection
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Logout Confirmation Modal */}
       {isLogoutModalOpen && (

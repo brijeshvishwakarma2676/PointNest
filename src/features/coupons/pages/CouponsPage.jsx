@@ -180,75 +180,125 @@ const CouponsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {coupons.map((coupon) => (
-                <tr key={coupon.id} className="group hover:bg-gray-50/50 transition-colors">
-                  <td className="px-10 py-7">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-900 border border-gray-200 font-bold group-hover:bg-white group-hover:shadow-md transition-all">
-                        <TicketPercent size={18} />
+              {loading ? (
+                // Shimmering Skeleton Registry
+                [...Array(5)].map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="animate-pulse">
+                    <td className="px-10 py-7">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-gray-100 border border-gray-50" />
+                        <div className="space-y-2">
+                          <div className="h-4 w-32 bg-gray-100 rounded-md" />
+                          <div className="h-2 w-20 bg-gray-50 rounded-md" />
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-black text-gray-900 tracking-wider text-sm">{coupon.code}</p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Expires: {coupon.expiry_date ? new Date(coupon.expiry_date).toLocaleDateString() : 'Never'}</p>
+                    </td>
+                    <td className="px-10 py-7">
+                      <div className="h-8 w-24 bg-gray-100 rounded-xl" />
+                    </td>
+                    <td className="px-10 py-7 flex justify-center">
+                      <div className="h-8 w-8 rounded-full bg-gray-100" />
+                    </td>
+                    <td className="px-10 py-7">
+                      <div className="flex justify-end gap-3">
+                        <div className="h-9 w-9 rounded-xl bg-gray-100" />
+                        <div className="h-9 w-9 rounded-xl bg-gray-100" />
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-7">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-100 text-xs font-black text-gray-900 outline-none">
-                      {coupon.type === "percentage" ? `${coupon.value}%` : `₹${coupon.value}`}
-                      <span className="text-[8px] opacity-40 uppercase tracking-tighter">{coupon.type}</span>
-                    </div>
-                  </td>
-                  <td className="px-10 py-7 text-center">
-                    <Tooltip content={`Protocol Status: ${coupon.status}`}>
-                      <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full border transition-all ${
-                        coupon.status === "active" ? "bg-emerald-50 border-emerald-100" :
-                        "bg-rose-50 border-rose-100"
-                      }`}>
-                        <span className={`w-2 h-2 rounded-full animate-pulse ${
-                          coupon.status === "active" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
-                        }`} />
+                    </td>
+                  </tr>
+                ))
+              ) : coupons.length > 0 ? (
+                coupons.map((coupon) => (
+                  <tr key={coupon.id} className="group hover:bg-gray-50/50 transition-colors">
+                    <td className="px-10 py-7">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-900 border border-gray-200 font-bold group-hover:bg-white group-hover:shadow-md transition-all">
+                          <TicketPercent size={18} />
+                        </div>
+                        <div>
+                          <p className="font-black text-gray-900 tracking-wider text-sm">{coupon.code}</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Expires: {coupon.expiry_date ? new Date(coupon.expiry_date).toLocaleDateString() : 'Never'}</p>
+                        </div>
                       </div>
-                    </Tooltip>
-                  </td>
-                  <td className="px-10 py-7 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                       <Tooltip content="Audit Redemption Path" position="top-right">
-                         <button
-                          onClick={() => {
-                            setSelectedCoupon(coupon);
-                            setIsAuditModalOpen(true);
-                          }}
-                          className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
-                        >
-                          <Eye size={18} />
-                        </button>
+                    </td>
+                    <td className="px-10 py-7">
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-100 text-xs font-black text-gray-900 outline-none">
+                        {coupon.type === "percentage" ? `${coupon.value}%` : `₹${coupon.value}`}
+                        <span className="text-[8px] opacity-40 uppercase tracking-tighter">{coupon.type}</span>
+                      </div>
+                    </td>
+                    <td className="px-10 py-7 text-center">
+                      <Tooltip content={`Protocol Status: ${coupon.status}`}>
+                        <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full border transition-all ${
+                          coupon.status === "active" ? "bg-emerald-50 border-emerald-100" :
+                          "bg-rose-50 border-rose-100"
+                        }`}>
+                          <span className={`w-2 h-2 rounded-full animate-pulse ${
+                            coupon.status === "active" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+                          }`} />
+                        </div>
                       </Tooltip>
-                      {coupon.status !== "used" && (
-                        <Tooltip content={coupon.status === "active" ? "Deactivate Coupon" : "Activate Coupon"} position="top-right">
-                          <button
-                            onClick={() => toggleVoucherStatus(coupon.id)}
-                            disabled={togglingId === coupon.id}
-                            className={`p-2.5 rounded-xl transition-all border border-transparent hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
-                              coupon.status === "active" 
-                              ? "text-rose-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100" 
-                              : "text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100"
-                            }`}
+                    </td>
+                    <td className="px-10 py-7 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                         <Tooltip content="Audit Redemption Path" position="top-right">
+                           <button
+                            onClick={() => {
+                              setSelectedCoupon(coupon);
+                              setIsAuditModalOpen(true);
+                            }}
+                            className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
                           >
-                            {togglingId === coupon.id ? (
-                              <Loader2 size={18} className="animate-spin" />
-                            ) : coupon.status === "active" ? (
-                              <Ban size={18} />
-                            ) : (
-                              <CheckCircle size={18} />
-                            )}
+                            <Eye size={18} />
                           </button>
                         </Tooltip>
-                      )}
+                        {coupon.status !== "used" && (
+                          <Tooltip content={coupon.status === "active" ? "Deactivate Coupon" : "Activate Coupon"} position="top-right">
+                            <button
+                              onClick={() => toggleVoucherStatus(coupon.id)}
+                              disabled={togglingId === coupon.id}
+                              className={`p-2.5 rounded-xl transition-all border border-transparent hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                                coupon.status === "active" 
+                                ? "text-rose-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100" 
+                                : "text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100"
+                              }`}
+                            >
+                              {togglingId === coupon.id ? (
+                                <Loader2 size={18} className="animate-spin" />
+                              ) : coupon.status === "active" ? (
+                                <Ban size={18} />
+                              ) : (
+                                <CheckCircle size={18} />
+                              )}
+                            </button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                // Empty Registry Placeholder
+                <tr>
+                  <td colSpan={4} className="px-10 py-32 text-center">
+                    <div className="flex flex-col items-center gap-6 opacity-30">
+                      <div className="w-20 h-20 rounded-[2rem] bg-gray-50 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
+                        <Layers size={40} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-gray-900 uppercase tracking-widest mb-2 italic">Voucher Registry Empty</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Authorize your first coupon protocol to begin tracking.</p>
+                      </div>
+                      <button
+                        onClick={() => navigate("/coupons/create")}
+                        className="px-8 py-3 bg-[#0A0A0B] text-white text-[9px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-gray-200"
+                      >
+                        Create Your First Coupon
+                      </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

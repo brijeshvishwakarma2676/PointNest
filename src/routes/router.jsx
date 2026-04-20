@@ -14,6 +14,7 @@ import PointsHistory from "../features/customers/pages/PointsHistory";
 import CouponsPage from "../features/coupons/pages/CouponsPage";
 import CouponUsagePage from "../features/coupons/pages/CouponUsagePage";
 import CreateCouponPage from "../features/coupons/pages/CreateCouponPage";
+import ProfilePage from "../features/profile/pages/ProfilePage";
 
 // A wrapper component that checks for authentication
 const ProtectedRoute = ({ children }) => {
@@ -139,6 +140,15 @@ export default function Router() {
           element={
             <ProtectedRoute>
               <CouponUsagePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />
