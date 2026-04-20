@@ -39,6 +39,10 @@ const CreateCouponPage = () => {
     is_stackable: false
   });
 
+  const [formErrors, setFormErrors] = useState({
+    code: null
+  });
+
   const handleMintVoucher = async (e) => {
     e.preventDefault();
     try {
@@ -66,7 +70,13 @@ const CreateCouponPage = () => {
         toast.error(result.message || "Minting authorization failed");
       }
     } catch (error) {
-      toast.error(error.message || "Critical: Network timeout during minting");
+      const errorMsg = error.message || "Critical: Network timeout during minting";
+      toast.error(errorMsg);
+      
+      // Persist error on UI if it's a conflict
+      if (errorMsg.toLowerCase().includes("already authorized") || errorMsg.toLowerCase().includes("already exists")) {
+        setFormErrors(prev => ({ ...prev, code: errorMsg }));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -116,9 +126,21 @@ const CreateCouponPage = () => {
                   required
                   placeholder="e.g. SUMMER-2026"
                   value={newVoucher.code}
-                  onChange={(e) => setNewVoucher({...newVoucher, code: e.target.value.toUpperCase()})}
-                  className="w-full px-6 py-5 rounded-3xl bg-gray-50 border border-transparent focus:bg-white focus:border-gray-900 focus:shadow-xl focus:shadow-gray-100/50 outline-none transition-all text-gray-900 font-extrabold text-sm tracking-[0.2em]"
+                  onChange={(e) => {
+                    setNewVoucher({...newVoucher, code: e.target.value.toUpperCase()});
+                    if (formErrors.code) setFormErrors(prev => ({ ...prev, code: null }));
+                  }}
+                  className={`w-full px-6 py-5 rounded-3xl bg-gray-50 border outline-none transition-all text-gray-900 font-extrabold text-sm tracking-[0.2em] ${
+                    formErrors.code 
+                    ? "border-rose-500 bg-rose-50/20 focus:border-rose-600 shadow-xl shadow-rose-100/50" 
+                    : "border-transparent focus:bg-white focus:border-gray-900 focus:shadow-xl focus:shadow-gray-100/50"
+                  }`}
                 />
+                {formErrors.code && (
+                  <p className="mt-3 px-1 text-[10px] font-black text-rose-500 uppercase tracking-widest animate-in slide-in-from-top-1 duration-300">
+                    Conflict: {formErrors.code}
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -321,12 +343,12 @@ const CreateCouponPage = () => {
         <div className="pt-10">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !!formErrors.code}
             className={`w-full py-8 rounded-[2rem] text-white text-xs font-black uppercase tracking-[0.5em] transition-all shadow-2xl active:scale-95 group flex items-center justify-center gap-4 ${
-              submitting ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#0A0A0B] hover:shadow-gray-200'
+              (submitting || !!formErrors.code) ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#0A0A0B] hover:shadow-gray-200'
             }`}
           >
-            {submitting ? 'Minting Protocol...' : 'Confirm & Authorize Voucher'}
+            {submitting ? 'Minting Protocol...' : !!formErrors.code ? 'Fix Protocol Conflict' : 'Confirm & Authorize Voucher'}
             {!submitting && <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />}
           </button>
           <p className="mt-6 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">

@@ -70,6 +70,7 @@ apiClient.interceptors.response.use(
     // Format error message to be easily consumable by the UI
     const customError = {
       message:
+        error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
         "An unexpected error occurred",

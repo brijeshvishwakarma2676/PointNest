@@ -26,6 +26,7 @@ import {
   Layers,
   Calendar
 } from "lucide-react";
+import { Tooltip } from "../../../components/ui";
 import { couponsApi } from "../api";
 
 /**
@@ -37,6 +38,7 @@ const CouponsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
   
   const [coupons, setCoupons] = useState([]);
 
@@ -52,7 +54,7 @@ const CouponsPage = () => {
       }
     } catch (error) {
       console.error("Registry fetch error:", error);
-      toast.error("Network error: Protocol synchronization failed");
+      toast.error(error.message || "Network error: Protocol synchronization failed");
     } finally {
       setLoading(false);
     }
@@ -64,6 +66,7 @@ const CouponsPage = () => {
 
   const toggleVoucherStatus = async (id) => {
     try {
+      setTogglingId(id);
       const result = await couponsApi.toggleCouponStatus(id);
       if (result.success) {
         toast.success(result.message);
@@ -72,7 +75,9 @@ const CouponsPage = () => {
         toast.error(result.message || "Authorization toggle failed");
       }
     } catch (error) {
-      toast.error("Network synchronization error");
+      toast.error(error.message || "Network synchronization error");
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -195,40 +200,50 @@ const CouponsPage = () => {
                     </div>
                   </td>
                   <td className="px-10 py-7 text-center">
-                    <div className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                      coupon.status === "active" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                      "bg-rose-50 text-rose-600 border-rose-100"
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        coupon.status === "active" ? "bg-emerald-500" : "bg-rose-500"
-                      }`} />
-                      {coupon.status}
-                    </div>
+                    <Tooltip content={`Protocol Status: ${coupon.status}`}>
+                      <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full border transition-all ${
+                        coupon.status === "active" ? "bg-emerald-50 border-emerald-100" :
+                        "bg-rose-50 border-rose-100"
+                      }`}>
+                        <span className={`w-2 h-2 rounded-full animate-pulse ${
+                          coupon.status === "active" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+                        }`} />
+                      </div>
+                    </Tooltip>
                   </td>
                   <td className="px-10 py-7 text-right">
                     <div className="flex items-center justify-end gap-3">
-                       <button
-                        onClick={() => {
-                          setSelectedCoupon(coupon);
-                          setIsAuditModalOpen(true);
-                        }}
-                        className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
-                        title="Audit Redemption Path"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      {coupon.status !== "used" && (
-                        <button
-                          onClick={() => toggleVoucherStatus(coupon.id)}
-                          className={`p-2.5 rounded-xl transition-all border border-transparent hover:shadow-md ${
-                            coupon.status === "active" 
-                            ? "text-rose-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100" 
-                            : "text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100"
-                          }`}
-                          title={coupon.status === "active" ? "Revoke Protocol" : "Authorize Protocol"}
+                       <Tooltip content="Audit Redemption Path" position="top-right">
+                         <button
+                          onClick={() => {
+                            setSelectedCoupon(coupon);
+                            setIsAuditModalOpen(true);
+                          }}
+                          className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-md rounded-xl transition-all border border-transparent hover:border-gray-200"
                         >
-                          {coupon.status === "active" ? <Ban size={18} /> : <CheckCircle size={18} />}
+                          <Eye size={18} />
                         </button>
+                      </Tooltip>
+                      {coupon.status !== "used" && (
+                        <Tooltip content={coupon.status === "active" ? "Deactivate Coupon" : "Activate Coupon"} position="top-right">
+                          <button
+                            onClick={() => toggleVoucherStatus(coupon.id)}
+                            disabled={togglingId === coupon.id}
+                            className={`p-2.5 rounded-xl transition-all border border-transparent hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                              coupon.status === "active" 
+                              ? "text-rose-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100" 
+                              : "text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100"
+                            }`}
+                          >
+                            {togglingId === coupon.id ? (
+                              <Loader2 size={18} className="animate-spin" />
+                            ) : coupon.status === "active" ? (
+                              <Ban size={18} />
+                            ) : (
+                              <CheckCircle size={18} />
+                            )}
+                          </button>
+                        </Tooltip>
                       )}
                     </div>
                   </td>
