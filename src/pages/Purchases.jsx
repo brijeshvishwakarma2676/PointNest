@@ -11,7 +11,8 @@ import {
   Search,
   User,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  Ticket
 } from "lucide-react";
 
 const Purchases = () => {
@@ -91,7 +92,9 @@ const Purchases = () => {
               <tr className="border-b border-gray-100">
                 <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Merchant Client</th>
                 <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Ref ID</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Value (INR)</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Voucher</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Subtotal</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Net Payable</th>
                 <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Yield (PTS)</th>
                 <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Executed At</th>
               </tr>
@@ -100,7 +103,7 @@ const Purchases = () => {
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan="5" className="px-10 py-7">
+                    <td colSpan="7" className="px-10 py-7">
                       <div className="h-4 bg-gray-100 rounded-full w-1/3 mb-3"></div>
                       <div className="h-3 bg-gray-50 rounded-full w-1/5"></div>
                     </td>
@@ -108,7 +111,7 @@ const Purchases = () => {
                 ))
               ) : purchases.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-10 py-32 text-center">
+                  <td colSpan="7" className="px-10 py-32 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-30">
                       <ShoppingBag size={48} className="text-gray-400" />
                       <p className="text-lg font-black text-gray-400 uppercase tracking-tighter">
@@ -136,10 +139,37 @@ const Purchases = () => {
                         #{pur.id?.toString().padStart(6, '0')}
                       </span>
                     </td>
+                    <td className="px-10 py-7">
+                      {pur.coupon_code ? (
+                         <div className="flex items-center gap-1.5 text-emerald-600 leading-none">
+                           <Ticket size={11} className="shrink-0" />
+                           <span className="text-[10px] font-black uppercase tracking-widest">
+                             {pur.coupon_code}
+                           </span>
+                         </div>
+                      ) : (
+                         <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">No Voucher</span>
+                      )}
+                    </td>
                     <td className="px-10 py-7 text-right">
-                      <p className="text-lg font-bold text-gray-900 tracking-tight">
-                        ₹{pur.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </p>
+                      <div className="flex flex-col items-end">
+                        <p className="text-[12px] font-bold text-gray-400 line-through decoration-gray-300 leading-none mb-1">
+                          ₹{pur.amount?.toLocaleString()}
+                        </p>
+                        {(pur.coupon_discount > 0 || pur.points_discount > 0) && (
+                          <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none">
+                            -₹{((pur.coupon_discount || 0) + (pur.points_discount || 0)).toLocaleString()} SAVED
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-10 py-7 text-right">
+                      <div className="bg-[#0A0A0B] text-white px-5 py-3 rounded-2xl inline-block shadow-lg shadow-gray-200/50">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mb-1 leading-none">Net Paid</p>
+                        <p className="text-lg font-black tracking-tight leading-none text-white">
+                          ₹{(pur.payable_amount || pur.amount)?.toLocaleString()}
+                        </p>
+                      </div>
                     </td>
                     <td className="px-10 py-7 text-right">
                       <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-50 text-gray-900 border border-gray-200 text-xs font-bold shadow-sm group-hover:bg-[#0A0A0B] group-hover:text-white group-hover:border-[#0A0A0B] transition-all">

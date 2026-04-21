@@ -14,6 +14,7 @@ import PointsHistory from "../features/customers/pages/PointsHistory";
 import CouponsPage from "../features/coupons/pages/CouponsPage";
 import CouponUsagePage from "../features/coupons/pages/CouponUsagePage";
 import CreateCouponPage from "../features/coupons/pages/CreateCouponPage";
+import RedeemCouponPage from "../features/coupons/pages/RedeemCouponPage";
 import ProfilePage from "../features/profile/pages/ProfilePage";
 
 // A wrapper component that checks for authentication
@@ -140,6 +141,15 @@ export default function Router() {
           element={
             <ProtectedRoute>
               <CouponUsagePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/coupons/redeem"
+          element={
+            <ProtectedRoute>
+              <RedeemCouponPage />
             </ProtectedRoute>
           }
         />

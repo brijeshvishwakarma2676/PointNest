@@ -12,4 +12,6 @@ export default {
   redemptions_list: "redemptions",
   customer_points_history: "customers/ledger",
   coupons: "coupons",
+  coupons_validate: "coupons/validate",
+  coupons_redeem: "coupons/redeem",
 };

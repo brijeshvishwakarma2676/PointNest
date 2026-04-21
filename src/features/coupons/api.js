@@ -39,5 +39,21 @@ export const couponsApi = {
    */
   getCouponDetail: async (id) => {
     return await apiClient.get(`${urls.coupons}/${id}`);
+  },
+
+  /**
+   * Validates a coupon token before redemption
+   * @param {string} code - The voucher code
+   */
+  validateCoupon: async (code) => {
+    return await apiClient.post(urls.coupons_validate, { code });
+  },
+
+  /**
+   * Finalizes the voucher redemption protocol
+   * @param {Object} data - { code, customer_phone, order_amount }
+   */
+  redeemCoupon: async (data) => {
+    return await apiClient.post(urls.coupons_redeem, data);
   }
 };

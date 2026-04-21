@@ -15,7 +15,8 @@ import {
   Search,
   Activity,
   ArrowUpRight,
-  ArrowDownToLine
+  ArrowDownToLine,
+  Ticket
 } from "lucide-react";
 import useAuthStore from "../store/authStore";
 import { purchasesApi } from "../features/purchases/api";
@@ -248,7 +249,7 @@ const Dashboard = () => {
                 <thead>
                   <tr className="border-b border-gray-100">
                     <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest">Customer</th>
-                    <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right">Amount</th>
+                    <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right">Net Amount</th>
                     <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right">Points</th>
                     <th className="pb-3 px-2 font-bold text-[10px] text-gray-400 uppercase tracking-widest text-right hidden sm:table-cell">Timestamp</th>
                   </tr>
@@ -273,7 +274,18 @@ const Dashboard = () => {
                           </div>
                         </td>
                         <td className="py-4 px-2 text-right">
-                          <p className="font-bold text-sm text-gray-900">₹{purchase.amount?.toLocaleString()}</p>
+                          <p className="font-bold text-sm text-gray-900">₹{(purchase.payable_amount || purchase.amount)?.toLocaleString()}</p>
+                          {((purchase.coupon_discount || 0) + (purchase.points_discount || 0)) > 0 && (
+                            <p className="text-[10px] text-rose-500 font-bold tracking-tighter mt-0.5 leading-none">
+                              -₹{((purchase.coupon_discount || 0) + (purchase.points_discount || 0)).toLocaleString()}
+                            </p>
+                          )}
+                          {purchase.coupon_code && (
+                             <div className="flex items-center justify-end gap-1.5 text-emerald-500 text-[10px] font-black uppercase tracking-widest mt-0.5 leading-none">
+                               <Ticket size={11} className="shrink-0" />
+                               {purchase.coupon_code}
+                             </div>
+                          )}
                         </td>
                         <td className="py-4 px-2 text-right">
                           <span className="inline-flex items-center text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-100/50">

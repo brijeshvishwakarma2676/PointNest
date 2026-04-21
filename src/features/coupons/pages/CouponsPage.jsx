@@ -12,6 +12,8 @@ import {
   X, 
   ShieldCheck, 
   Loader2,
+  ChevronLeft,
+  ChevronRight,
   Trash2,
   History,
   TrendingUp,
@@ -41,14 +43,20 @@ const CouponsPage = () => {
   const [togglingId, setTogglingId] = useState(null);
   
   const [coupons, setCoupons] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, total: 0, size: 5 });
 
   // Fetch Voucher Registry from API using standard service
-  const fetchRegistry = async () => {
+  const fetchRegistry = async (pageNum = 1) => {
     try {
       setLoading(true);
-      const result = await couponsApi.getCoupons({ search_query: searchQuery });
+      const result = await couponsApi.getCoupons({ search_query: searchQuery, page: pageNum, size: 5 });
       if (result.success) {
         setCoupons(result.data.items || []);
+        setPagination({
+          page: result.data.page || pageNum,
+          total: result.data.total || 0,
+          size: result.data.size || 5
+        });
       } else {
         toast.error(result.message || "Failed to fetch registry");
       }
@@ -61,7 +69,7 @@ const CouponsPage = () => {
   };
 
   useEffect(() => {
-    fetchRegistry();
+    fetchRegistry(1);
   }, [searchQuery]);
 
   const toggleVoucherStatus = async (id) => {
@@ -70,7 +78,7 @@ const CouponsPage = () => {
       const result = await couponsApi.toggleCouponStatus(id);
       if (result.success) {
         toast.success(result.message);
-        fetchRegistry(); // Refresh logic
+        fetchRegistry(pagination.page); // Refresh logic
       } else {
         toast.error(result.message || "Authorization toggle failed");
       }
@@ -86,6 +94,16 @@ const CouponsPage = () => {
     active: coupons.filter(c => c.status === "active").length,
     redeemed: coupons.filter(c => c.usage_count > 0).length
   };
+
+  const statusStyles = {
+    active: { bg: "bg-emerald-50", border: "border-emerald-100", dot: "bg-emerald-500", glow: "shadow-[0_0_8px_rgba(16,185,129,0.5)]" },
+    upcoming: { bg: "bg-amber-50", border: "border-amber-100", dot: "bg-amber-500", glow: "shadow-[0_0_8px_rgba(245,158,11,0.5)]" },
+    exhausted: { bg: "bg-indigo-50", border: "border-indigo-100", dot: "bg-indigo-500", glow: "" },
+    expired: { bg: "bg-rose-50", border: "border-rose-100", dot: "bg-rose-500", glow: "" },
+    draft: { bg: "bg-gray-50", border: "border-gray-200", dot: "bg-gray-400", glow: "" }
+  };
+
+  const getStatusStyle = (status) => statusStyles[status] || statusStyles.expired;
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen font-sans antialiased text-gray-900">
@@ -119,6 +137,13 @@ const CouponsPage = () => {
               className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white border border-gray-200 focus:border-gray-900 outline-none transition-all text-gray-900 text-sm font-bold placeholder-gray-300"
             />
           </div>
+          <button
+            onClick={() => navigate("/coupons/redeem")}
+            className="flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 py-4 bg-white text-gray-900 border border-gray-100 font-bold rounded-2xl hover:border-gray-900 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+          >
+            <TicketPercent size={18} />
+            Redeem Voucher
+          </button>
           <button
             onClick={() => navigate("/coupons/create")}
             className="flex items-center justify-center gap-2.5 w-full sm:w-auto px-6 py-4 bg-[#0A0A0B] text-white font-bold rounded-2xl hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-gray-200 whitespace-nowrap"
@@ -228,14 +253,9 @@ const CouponsPage = () => {
                       </div>
                     </td>
                     <td className="px-10 py-7 text-center">
-                      <Tooltip content={`Protocol Status: ${coupon.status}`}>
-                        <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full border transition-all ${
-                          coupon.status === "active" ? "bg-emerald-50 border-emerald-100" :
-                          "bg-rose-50 border-rose-100"
-                        }`}>
-                          <span className={`w-2 h-2 rounded-full animate-pulse ${
-                            coupon.status === "active" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
-                          }`} />
+                      <Tooltip content={`Protocol Status: ${coupon.status.toUpperCase()}`}>
+                        <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full border transition-all ${getStatusStyle(coupon.status).bg} ${getStatusStyle(coupon.status).border}`}>
+                          <span className={`w-2 h-2 rounded-full ${getStatusStyle(coupon.status).dot} ${getStatusStyle(coupon.status).glow} ${coupon.status === "active" || coupon.status === "upcoming" ? "animate-pulse" : ""}`} />
                         </div>
                       </Tooltip>
                     </td>
@@ -302,6 +322,31 @@ const CouponsPage = () => {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination Details */}
+        {!loading && pagination.total > 0 && (
+          <div className="px-10 py-6 border-t border-gray-50 flex items-center justify-between bg-gray-50/30">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              Showing {(pagination.page - 1) * pagination.size + 1} TO {Math.min(pagination.page * pagination.size, pagination.total)} OF {pagination.total} CODES
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => fetchRegistry(pagination.page - 1)}
+                disabled={pagination.page === 1}
+                className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-900 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={() => fetchRegistry(pagination.page + 1)}
+                disabled={pagination.page * pagination.size >= pagination.total}
+                className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-900 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Usage History Modal */}
@@ -340,7 +385,7 @@ const CouponsPage = () => {
                   <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Current Status</p>
                     <div className="inline-flex items-center gap-2 text-sm font-black text-gray-900 uppercase">
-                        <span className={`w-2 h-2 rounded-full ${selectedCoupon?.status === 'active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                        <span className={`w-2 h-2 rounded-full ${getStatusStyle(selectedCoupon?.status).dot}`} />
                         {selectedCoupon?.status}
                     </div>
                   </div>

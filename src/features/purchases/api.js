@@ -8,11 +8,8 @@ export const purchasesApi = {
    * @param {number} amount - Purchase amount
    * @returns Promise resolving to the purchase creation response
    */
-  addPurchase: async (phone, amount) => {
-    // As per requirement: purchases?phone=9999999999&amount=100
-    return await apiClient.post(
-      `${urls.purchases}?phone=${phone}&amount=${amount}`,
-    );
+  addPurchase: async (data) => {
+    return await apiClient.post(urls.purchases, data);
   },
 
   /**

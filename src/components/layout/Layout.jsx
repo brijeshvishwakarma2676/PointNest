@@ -26,6 +26,7 @@ import {
   TicketPercent
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
+import NotificationsDropdown from "./NotificationsDropdown";
 
 /**
  * Layout - Lumina Enterprise Edition
@@ -229,33 +230,10 @@ const Layout = ({ children }) => {
                 </button>
 
                 {/* Smooth Notification Dropdown */}
-                {isNotificationsOpen && (
-                  <div className="absolute top-16 right-0 w-80 bg-white border border-gray-200 rounded-[2rem] shadow-2xl py-6 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="px-6 mb-4 flex items-center justify-between">
-                      <h3 className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Recent Activity</h3>
-                      <span className="text-[9px] font-bold text-gray-400 uppercase">Clear All</span>
-                    </div>
-                    <div className="space-y-1 max-h-[320px] overflow-y-auto scrollbar-hide">
-                      {notifications.map((notif) => (
-                        <div key={notif.id} className="px-4 py-3 hover:bg-gray-50 transition-colors group cursor-pointer border-l-2 border-transparent hover:border-gray-900">
-                          <div className="flex items-start gap-4 px-2">
-                             <div className="mt-1 h-2 w-2 rounded-full bg-gray-900 group-hover:scale-125 transition-transform" />
-                             <div>
-                               <p className="text-[11px] font-black text-gray-900 uppercase tracking-wider leading-none mb-1">{notif.title}</p>
-                               <p className="text-[10px] text-gray-400 font-medium leading-relaxed">{notif.body}</p>
-                               <p className="text-[8px] font-bold text-gray-300 uppercase mt-2">{notif.time}</p>
-                             </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-6 px-6 pt-6 border-t border-gray-100">
-                       <button className="w-full py-3 rounded-xl bg-gray-50 text-[10px] font-black text-gray-900 uppercase tracking-widest hover:bg-gray-100 transition-all">
-                        View Audit Log
-                       </button>
-                    </div>
-                  </div>
-                )}
+                <NotificationsDropdown 
+                  isOpen={isNotificationsOpen} 
+                  notifications={notifications} 
+                />
               </div>
 
               <div className="h-8 w-px bg-gray-100 mx-1 hidden md:block" />
