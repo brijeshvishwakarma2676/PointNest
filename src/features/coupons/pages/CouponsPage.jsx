@@ -123,7 +123,7 @@ const CouponsPage = () => {
             Create new discount coupons, track how many times they've been used, and manage your active promotions.
           </p>
         </div>
-
+    
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
           <div className="relative w-full sm:w-64 group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-gray-900 transition-colors">

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import NotificationsDropdown from "./NotificationsDropdown";
+import { notificationsApi } from "../../features/notifications/api";
 
 /**
  * Layout - Lumina Enterprise Edition
@@ -50,12 +51,52 @@ const Layout = ({ children }) => {
   const searchInputRef = useRef(null);
   const notificationRef = useRef(null);
 
-  const [notifications] = useState([
-    { id: 1, title: "Client Enrollment", body: "Alexander S. verified as Lumina Prime", time: "2m ago", type: "system" },
-    { id: 2, title: "Voucher Authorized", body: "#55412 generated for Terminal B", time: "15m ago", type: "financial" },
-    { id: 3, title: "Registry Audit", body: "Monthly performance metrics compiled", time: "1h ago", type: "audit" },
-    { id: 4, title: "Security Link", body: "New connection established from IP 192.168.1.1", time: "3h ago", type: "security" },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch live notifications from the backend
+  const fetchNotifications = async () => {
+    try {
+      const result = await notificationsApi.getAll(20);
+      if (result.success) {
+        setNotifications(result.data.items || []);
+        setUnreadCount(result.data.unread_count || 0);
+      }
+    } catch (e) {
+      // Silent fail — notifications are non-critical
+    }
+  };
+
+  // Open dropdown and mark all as read
+  const handleOpenNotifications = async () => {
+    const opening = !isNotificationsOpen;
+    setIsNotificationsOpen(opening);
+    if (opening) {
+      fetchNotifications();
+      if (unreadCount > 0) {
+        try {
+          await notificationsApi.markAllRead();
+          setUnreadCount(0);
+          setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        } catch (e) { /* silent */ }
+      }
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await notificationsApi.clearAll();
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (e) { /* silent */ }
+  };
+
+  // Initial fetch + 60s polling
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -222,17 +263,22 @@ const Layout = ({ children }) => {
               {/* Notification System */}
               <div className="relative" ref={notificationRef}>
                 <button 
-                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  onClick={handleOpenNotifications}
                   className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all relative ${isNotificationsOpen ? 'bg-[#0A0A0B] text-white shadow-xl' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-900'}`}
                 >
                   <Bell size={20} />
-                  <span className="absolute top-3 right-3 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-rose-500 text-white text-[10px] font-black rounded-full border-2 border-white shadow-lg animate-in zoom-in duration-300">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </button>
 
                 {/* Smooth Notification Dropdown */}
                 <NotificationsDropdown 
                   isOpen={isNotificationsOpen} 
-                  notifications={notifications} 
+                  notifications={notifications}
+                  onClearAll={handleClearAll}
                 />
               </div>
 
