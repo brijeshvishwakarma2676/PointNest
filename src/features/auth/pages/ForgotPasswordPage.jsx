@@ -47,7 +47,7 @@ const ForgotPasswordPage = () => {
         toast.warning(response.message || "Security authorization request dispatched.");
       }
     } catch (error) {
-      toast.success("Security verification request completed.");
+      toast.error(error.response?.data?.message || "Registered access profile (email) not found.");
     } finally {
       setLoading(false);
       setStep(2); // Transition to the OTP input step
