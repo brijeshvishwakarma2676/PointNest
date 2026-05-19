@@ -43,14 +43,14 @@ const ForgotPasswordPage = () => {
       const response = await authApi.forgotPassword(email);
       if (response.success) {
         toast.success(response.message || "Security OTP code dispatched successfully!");
+        setStep(2); // Transition to the OTP input step only on success
       } else {
-        toast.warning(response.message || "Security authorization request dispatched.");
+        toast.error(response.message || "Failed to dispatch recovery code.");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Registered access profile (email) not found.");
     } finally {
       setLoading(false);
-      setStep(2); // Transition to the OTP input step
     }
   };
 
