@@ -48,7 +48,7 @@ const ForgotPasswordPage = () => {
         toast.error(response.message || "Failed to dispatch recovery code.");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registered access profile (email) not found.");
+      toast.error(error.message || "Registered access profile (email) not found.");
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ const ForgotPasswordPage = () => {
         toast.error(response.message || "Invalid verification OTP code.");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Invalid or expired verification OTP code.");
+      toast.error(error.message || "Invalid or expired verification OTP code.");
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,7 @@ const ForgotPasswordPage = () => {
         toast.error(response.message || "Failed to reset password.");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Verification expired or invalid. Please try again.");
+      toast.error(error.message || "Verification expired or invalid. Please try again.");
     } finally {
       setLoading(false);
     }
