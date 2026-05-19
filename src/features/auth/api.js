@@ -33,4 +33,18 @@ export const authApi = {
       refresh_token: refreshToken,
     });
   },
+
+  forgotPassword: async (email) => {
+    return await apiClient.post(urls.forgot_password, { email });
+  },
+
+  verifyOtp: async (email, otp) => {
+    return await apiClient.post(urls.verify_otp, { email, otp });
+  },
+
+  resetPassword: async (resetData) => {
+    return await apiClient.post(urls.reset_password, resetData);
+  },
+
 };
+

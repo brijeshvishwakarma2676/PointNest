@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/authStore";
 import toast from "react-hot-toast";
-import { 
-  ShieldCheck, 
-  Store, 
-  User, 
-  Mail, 
-  Phone, 
-  Lock, 
-  ChevronRight, 
+import {
+  ShieldCheck,
+  Store,
+  User,
+  Mail,
+  Phone,
+  Lock,
+  ChevronRight,
   ExternalLink,
   Info,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 
 /**
- * RegisterPage - Lumina Noir Edition
+ * RegisterPage - PointNest Noir Edition
  * A high-impact enrollment terminal for new enterprises.
  */
 const RegisterPage = () => {
@@ -67,10 +67,10 @@ const RegisterPage = () => {
         {/* Terminal Header */}
         <div className="mb-10 text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white text-black border border-gray-200 shadow-2xl">
-             <Store size={36} strokeWidth={2.5} />
+            <Store size={36} strokeWidth={2.5} />
           </div>
           <div className="inline-flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-3">
-             Entity Registration Protocol
+            Entity Registration Protocol
           </div>
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2 italic">
             ENROLLMENT
@@ -92,7 +92,9 @@ const RegisterPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Enterprise Name</label>
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                  Enterprise Name
+                </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                     <Store size={16} />
@@ -100,7 +102,7 @@ const RegisterPage = () => {
                   <input
                     type="text"
                     name="shop_name"
-                    placeholder="Lumina HQ"
+                    placeholder="PointNest HQ"
                     value={formData.shop_name}
                     onChange={handleChange}
                     className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
@@ -109,7 +111,9 @@ const RegisterPage = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Admin Identity</label>
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                  Admin Identity
+                </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                     <User size={16} />
@@ -128,7 +132,9 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Access Protocol (Email)</label>
+              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                Access Protocol (Email)
+              </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                   <Mail size={16} />
@@ -146,7 +152,9 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Primary Communication Link (Phone)</label>
+              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                Primary Communication Link (Phone)
+              </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                   <Phone size={16} />
@@ -165,7 +173,9 @@ const RegisterPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Secure Key</label>
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                  Secure Key
+                </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                     <Lock size={16} />
@@ -182,7 +192,9 @@ const RegisterPage = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Confirm Key</label>
+                <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                  Confirm Key
+                </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                     <Lock size={16} />
@@ -232,8 +244,8 @@ const RegisterPage = () => {
 
         {/* Global Footer */}
         <div className="mt-12 text-center pb-8">
-           <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
-            Identity Proxy © 2026 Lumina Group
+          <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
+            Identity Proxy © 2026 PointNest Group
           </p>
         </div>
       </div>

@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
-import { 
-  ShieldAlert, 
-  Home, 
-  ChevronLeft, 
-  Search, 
+import {
+  ShieldAlert,
+  Home,
+  ChevronLeft,
+  Search,
   Compass,
   ArrowLeft,
-  Terminal
+  Terminal,
 } from "lucide-react";
 
 /**
- * NotFound - Lumina Noir Edition
+ * NotFound - PointNest Noir Edition
  * A high-impact 404 terminal for unresolved protocol addresses.
  */
 const NotFound = () => {
@@ -42,13 +42,13 @@ const NotFound = () => {
             <ShieldAlert size={12} />
             Unresolved Protocol
           </div>
-          
+
           <div className="relative">
             <h1 className="text-[12rem] md:text-[18rem] font-black text-white leading-none tracking-tighter italic opacity-10 select-none">
               404
             </h1>
             <div className="absolute inset-0 flex items-center justify-center">
-               <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-0">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-0">
                 Connection <br />
                 <span className="text-gray-500 italic">Terminated</span>
               </h2>
@@ -59,7 +59,8 @@ const NotFound = () => {
         {/* Action Card */}
         <div className="mt-12">
           <p className="text-gray-500 font-bold text-sm uppercase tracking-widest mb-12 max-w-sm mx-auto leading-relaxed">
-            The requested terminal address does not exist or has been relocated within the Lumina network.
+            The requested terminal address does not exist or has been relocated
+            within the PointNest network.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
@@ -67,7 +68,10 @@ const NotFound = () => {
               onClick={() => navigate(-1)}
               className="group w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-2xl border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/[0.03] transition-all active:scale-95"
             >
-              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft
+                size={14}
+                className="group-hover:-translate-x-1 transition-transform"
+              />
               Revert Session
             </button>
 
@@ -83,22 +87,34 @@ const NotFound = () => {
 
         {/* Security Footer */}
         <div className="mt-24 pt-12 border-t border-white/5 opacity-40">
-           <div className="flex items-center justify-center gap-8">
-             <div className="flex flex-col items-center gap-1">
-               <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">Error Sequence</span>
-               <span className="text-[10px] font-bold text-white tracking-widest">0xNULL_VAL</span>
-             </div>
-             <div className="h-6 w-px bg-white/10" />
-             <div className="flex flex-col items-center gap-1">
-               <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">Auth Status</span>
-               <span className="text-[10px] font-bold text-white tracking-widest">{isAuthenticated ? "VERIFIED" : "ANONYMOUS"}</span>
-             </div>
-             <div className="h-6 w-px bg-white/10" />
-             <div className="flex flex-col items-center gap-1">
-               <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">Protocol</span>
-               <span className="text-[10px] font-bold text-white tracking-widest">LUMINA-V3</span>
-             </div>
-           </div>
+          <div className="flex items-center justify-center gap-8">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">
+                Error Sequence
+              </span>
+              <span className="text-[10px] font-bold text-white tracking-widest">
+                0xNULL_VAL
+              </span>
+            </div>
+            <div className="h-6 w-px bg-white/10" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">
+                Auth Status
+              </span>
+              <span className="text-[10px] font-bold text-white tracking-widest">
+                {isAuthenticated ? "VERIFIED" : "ANONYMOUS"}
+              </span>
+            </div>
+            <div className="h-6 w-px bg-white/10" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[8px] font-black uppercase tracking-widest text-gray-500">
+                Protocol
+              </span>
+              <span className="text-[10px] font-bold text-white tracking-widest">
+                POINTNEST-V3
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

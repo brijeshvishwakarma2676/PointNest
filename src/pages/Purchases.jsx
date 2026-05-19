@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 import { purchasesApi } from "../features/purchases/api";
 import { formatDate, formatTime } from "../utils/dateUtils";
 import toast from "react-hot-toast";
-import { 
-  ShoppingBag, 
-  Plus, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  ShoppingBag,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
   Search,
   User,
   Clock,
   ArrowUpRight,
-  Ticket
+  Ticket,
 } from "lucide-react";
 
 const Purchases = () => {
@@ -35,7 +35,9 @@ const Purchases = () => {
         toast.error("Failed to load purchase history");
       }
     } catch (error) {
-      toast.error(error.message || "Something went wrong while fetching history");
+      toast.error(
+        error.message || "Something went wrong while fetching history",
+      );
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,8 @@ const Purchases = () => {
             <span className="text-gray-400">Audit Trail</span>
           </h1>
           <p className="text-gray-500 font-medium max-w-md text-sm leading-relaxed">
-            Detailed log of all customer transactions and points distributions across the Lumina network.
+            Detailed log of all customer transactions and points distributions
+            across the PointNest network.
           </p>
         </div>
 
@@ -90,13 +93,27 @@ const Purchases = () => {
           <table className="w-full text-left whitespace-nowrap">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Merchant Client</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Ref ID</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Voucher</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Subtotal</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Net Payable</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Yield (PTS)</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Executed At</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  Merchant Client
+                </th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  Ref ID
+                </th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  Voucher
+                </th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">
+                  Subtotal
+                </th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">
+                  Net Payable
+                </th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">
+                  Yield (PTS)
+                </th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">
+                  Executed At
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -122,33 +139,42 @@ const Purchases = () => {
                 </tr>
               ) : (
                 purchases.map((pur) => (
-                  <tr key={pur.id} className="group hover:bg-gray-50/50 transition-all duration-300">
+                  <tr
+                    key={pur.id}
+                    className="group hover:bg-gray-50/50 transition-all duration-300"
+                  >
                     <td className="px-10 py-7">
                       <div className="flex items-center gap-5">
                         <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center font-bold text-gray-900 border border-gray-200 group-hover:bg-white group-hover:shadow-md transition-all">
                           {pur.customer_name?.charAt(0).toUpperCase() || "?"}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900 text-base mb-0.5">{pur.customer_name}</p>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{pur.customer_phone}</p>
+                          <p className="font-bold text-gray-900 text-base mb-0.5">
+                            {pur.customer_name}
+                          </p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                            {pur.customer_phone}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-10 py-7">
                       <span className="text-[11px] font-black text-gray-400 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200/50">
-                        #{pur.id?.toString().padStart(6, '0')}
+                        #{pur.id?.toString().padStart(6, "0")}
                       </span>
                     </td>
                     <td className="px-10 py-7">
                       {pur.coupon_code ? (
-                         <div className="flex items-center gap-1.5 text-emerald-600 leading-none">
-                           <Ticket size={11} className="shrink-0" />
-                           <span className="text-[10px] font-black uppercase tracking-widest">
-                             {pur.coupon_code}
-                           </span>
-                         </div>
+                        <div className="flex items-center gap-1.5 text-emerald-600 leading-none">
+                          <Ticket size={11} className="shrink-0" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">
+                            {pur.coupon_code}
+                          </span>
+                        </div>
                       ) : (
-                         <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">No Voucher</span>
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
+                          No Voucher
+                        </span>
                       )}
                     </td>
                     <td className="px-10 py-7 text-right">
@@ -156,24 +182,36 @@ const Purchases = () => {
                         <p className="text-[12px] font-bold text-gray-400 line-through decoration-gray-300 leading-none mb-1">
                           ₹{pur.amount?.toLocaleString()}
                         </p>
-                        {(pur.coupon_discount > 0 || pur.points_discount > 0) && (
+                        {(pur.coupon_discount > 0 ||
+                          pur.points_discount > 0) && (
                           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none">
-                            -₹{((pur.coupon_discount || 0) + (pur.points_discount || 0)).toLocaleString()} SAVED
+                            -₹
+                            {(
+                              (pur.coupon_discount || 0) +
+                              (pur.points_discount || 0)
+                            ).toLocaleString()}{" "}
+                            SAVED
                           </p>
                         )}
                       </div>
                     </td>
                     <td className="px-10 py-7 text-right">
                       <div className="bg-[#0A0A0B] text-white px-5 py-3 rounded-2xl inline-block shadow-lg shadow-gray-200/50">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mb-1 leading-none">Net Paid</p>
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mb-1 leading-none">
+                          Net Paid
+                        </p>
                         <p className="text-lg font-black tracking-tight leading-none text-white">
-                          ₹{(pur.payable_amount || pur.amount)?.toLocaleString()}
+                          ₹
+                          {(pur.payable_amount || pur.amount)?.toLocaleString()}
                         </p>
                       </div>
                     </td>
                     <td className="px-10 py-7 text-right">
                       <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-50 text-gray-900 border border-gray-200 text-xs font-bold shadow-sm group-hover:bg-[#0A0A0B] group-hover:text-white group-hover:border-[#0A0A0B] transition-all">
-                        +{pur.points_earned} <span className="text-[9px] opacity-60 uppercase">pts</span>
+                        +{pur.points_earned}{" "}
+                        <span className="text-[9px] opacity-60 uppercase">
+                          pts
+                        </span>
                       </div>
                     </td>
                     <td className="px-10 py-7 text-right">
@@ -195,26 +233,36 @@ const Purchases = () => {
         {pagination.total > 0 && (
           <div className="px-10 py-8 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-              PAGE {pagination.page} OF {Math.ceil(pagination.total / pagination.size)}
+              PAGE {pagination.page} OF{" "}
+              {Math.ceil(pagination.total / pagination.size)}
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 disabled={pagination.page === 1 || loading}
                 onClick={() => fetchPurchases(pagination.page - 1)}
                 className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 text-xs font-bold hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
               >
-                <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                <ChevronLeft
+                  size={14}
+                  className="group-hover:-translate-x-0.5 transition-transform"
+                />
                 Previous
               </button>
-              
+
               <button
-                disabled={pagination.page * pagination.size >= pagination.total || loading}
+                disabled={
+                  pagination.page * pagination.size >= pagination.total ||
+                  loading
+                }
                 onClick={() => fetchPurchases(pagination.page + 1)}
                 className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 text-xs font-bold hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
               >
                 Next
-                <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight
+                  size={14}
+                  className="group-hover:translate-x-0.5 transition-transform"
+                />
               </button>
             </div>
           </div>
@@ -223,10 +271,10 @@ const Purchases = () => {
 
       {/* Audit Transparency Flag */}
       <div className="mt-12 flex justify-center">
-         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gray-50 border border-gray-200 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-           <ArrowUpRight size={14} className="text-gray-300" />
-           Certified Lumina Audit Protocol v2.4
-         </div>
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gray-50 border border-gray-200 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+          <ArrowUpRight size={14} className="text-gray-300" />
+          Certified PointNest Audit Protocol v2.4
+        </div>
       </div>
     </div>
   );

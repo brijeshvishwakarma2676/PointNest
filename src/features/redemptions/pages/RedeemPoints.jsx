@@ -2,30 +2,33 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
 import { redemptionsApi } from "../api";
-import { 
-  Gift, 
-  Phone, 
-  ShieldCheck, 
-  CheckCircle, 
-  CreditCard, 
-  ArrowRight, 
+import {
+  Gift,
+  Phone,
+  ShieldCheck,
+  CheckCircle,
+  CreditCard,
+  ArrowRight,
   RefreshCw,
   User,
   ArrowDownLeft,
   Check,
   AlertCircle,
-  Loader2
+  Loader2,
 } from "lucide-react";
 
 /**
- * RedeemPoints - Lumina Enterprise Edition
+ * RedeemPoints - PointNest Enterprise Edition
  * A high-impact redemption terminal with a minimalist enterprise aesthetic.
  */
 const RedeemPoints = () => {
   const [searchParams] = useSearchParams();
   const initialPhone = searchParams.get("phone") || "";
 
-  const [form, setForm] = useState({ phone: initialPhone, points_to_redeem: "" });
+  const [form, setForm] = useState({
+    phone: initialPhone,
+    points_to_redeem: "",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [customerData, setCustomerData] = useState(null);
@@ -57,9 +60,10 @@ const RedeemPoints = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const sanitizedValue = name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value;
+    const sanitizedValue =
+      name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value;
     setForm((prev) => ({ ...prev, [name]: sanitizedValue }));
-    
+
     if (name === "phone" && sanitizedValue.length === 10) {
       verifyClient(sanitizedValue);
     } else if (name === "phone") {
@@ -122,7 +126,8 @@ const RedeemPoints = () => {
           <span className="text-gray-400">Loyalty Yield</span>
         </h1>
         <p className="text-gray-500 font-medium max-w-sm text-sm leading-relaxed">
-          Convert accumulated verified points into an instantaneous monetary discount for the customer's purchase.
+          Convert accumulated verified points into an instantaneous monetary
+          discount for the customer's purchase.
         </p>
       </div>
 
@@ -141,8 +146,12 @@ const RedeemPoints = () => {
                   <Check size={40} strokeWidth={3} />
                 </div>
               </div>
-              <h2 className="text-3xl font-black tracking-tight mb-2">Redemption Verified</h2>
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">AUTH-ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+              <h2 className="text-3xl font-black tracking-tight mb-2">
+                Redemption Verified
+              </h2>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">
+                AUTH-ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+              </p>
             </div>
 
             <div className="p-10">
@@ -151,26 +160,48 @@ const RedeemPoints = () => {
                   {result.customer_name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Dossier Profile</p>
-                  <p className="text-xl font-bold text-gray-900 tracking-tight">{result.customer_name}</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                    Dossier Profile
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 tracking-tight">
+                    {result.customer_name}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Yield Deduction</p>
-                  <p className="text-3xl font-black text-gray-900 tracking-tighter">-{result.points_used}</p>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">POINTS</p>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                    Yield Deduction
+                  </p>
+                  <p className="text-3xl font-black text-gray-900 tracking-tighter">
+                    -{result.points_used}
+                  </p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    POINTS
+                  </p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Discount Auth</p>
-                  <p className="text-3xl font-black text-emerald-600 tracking-tighter">₹{result.amount_discounted?.toFixed(0)}</p>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">SAVINGS</p>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                    Discount Auth
+                  </p>
+                  <p className="text-3xl font-black text-emerald-600 tracking-tighter">
+                    ₹{result.amount_discounted?.toFixed(0)}
+                  </p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    SAVINGS
+                  </p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Closing Yield</p>
-                  <p className="text-3xl font-black text-gray-900 tracking-tighter">{result.remaining_points}</p>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">PTS REM</p>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                    Closing Yield
+                  </p>
+                  <p className="text-3xl font-black text-gray-900 tracking-tighter">
+                    {result.remaining_points}
+                  </p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    PTS REM
+                  </p>
                 </div>
               </div>
 
@@ -191,28 +222,38 @@ const RedeemPoints = () => {
           >
             <div className="space-y-8">
               {/* Identified Client Card */}
-              { (customerData || verifying) && (
+              {(customerData || verifying) && (
                 <div className="p-6 rounded-3xl bg-gray-50 border border-gray-100 flex items-center justify-between animate-in fade-in zoom-in duration-500">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center text-lg font-black text-gray-900 shadow-sm">
                       {verifying ? (
-                        <Loader2 className="animate-spin text-gray-400" size={20} />
+                        <Loader2
+                          className="animate-spin text-gray-400"
+                          size={20}
+                        />
                       ) : (
                         customerData?.name?.charAt(0).toUpperCase()
                       )}
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Identified Client</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                        Identified Client
+                      </p>
                       <p className="font-black text-gray-900">
-                        {verifying ? "Auditing Registry..." : customerData?.name}
+                        {verifying
+                          ? "Auditing Registry..."
+                          : customerData?.name}
                       </p>
                     </div>
                   </div>
                   {!verifying && (
                     <div className="text-right">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Avail Yield</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                        Avail Yield
+                      </p>
                       <p className="font-black text-emerald-600 text-lg">
-                        {customerData?.points} <span className="text-[10px] opacity-60">PTS</span>
+                        {customerData?.points}{" "}
+                        <span className="text-[10px] opacity-60">PTS</span>
                       </p>
                     </div>
                   )}
@@ -258,7 +299,7 @@ const RedeemPoints = () => {
                     className="w-full pl-16 pr-6 py-5 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-black text-lg tracking-widest placeholder:text-gray-200 rounded-2xl"
                   />
                 </div>
-                 <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 leading-relaxed">
+                <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1 leading-relaxed">
                   <ArrowDownLeft size={12} />
                   Yield will be authorized for immediate point deduction.
                 </div>

@@ -234,8 +234,8 @@ const Dashboard = () => {
                 </p>
                 <p className="mt-1 text-xs text-gray-500 font-medium leading-relaxed">
                   Discover hidden purchasing patterns and forecast customer
-                  behavior with our new advanced analytics suite. Treat your data
-                  as your greatest asset.
+                  behavior with our new advanced analytics suite. Treat your
+                  data as your greatest asset.
                 </p>
               </div>
             </div>
@@ -638,7 +638,7 @@ const Dashboard = () => {
           <div className="flex-1 space-y-6 relative z-10">
             <div className="inline-flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">
               <Sparkles size={14} className="text-gray-400" />
-              Lumina Enterprise
+              PointNest Enterprise
             </div>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
               Advanced AI <br /> Market Insights

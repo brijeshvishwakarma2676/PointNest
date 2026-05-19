@@ -2,6 +2,10 @@ export default {
   login: "auth/login",
   register: "auth/register",
   refresh_token: "auth/refresh",
+  forgot_password: "auth/forgot-password",
+  verify_otp: "auth/verify-otp",
+  reset_password: "auth/reset-password",
+
   get_me: "users/me",
   purchases: "purchases",
   customers: "customers/find-or-create",

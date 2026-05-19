@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/authStore";
 import toast from "react-hot-toast";
-import { 
-  ShieldCheck, 
-  Mail, 
-  Lock, 
-  ArrowRight, 
-  Fingerprint, 
+import {
+  ShieldCheck,
+  Mail,
+  Lock,
+  ArrowRight,
+  Fingerprint,
   Key,
   ChevronRight,
   Info,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 
 /**
- * LoginPage - Lumina Noir Edition
+ * LoginPage - PointNest Noir Edition
  * A high-impact, minimalist authentication terminal.
  */
 const LoginPage = () => {
@@ -54,13 +54,13 @@ const LoginPage = () => {
         {/* Terminal Header */}
         <div className="mb-10 text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2.5rem] bg-white text-black shadow-2xl shadow-gray-900 border border-gray-200">
-             <ShieldCheck size={36} strokeWidth={2.5} />
+            <ShieldCheck size={36} strokeWidth={2.5} />
           </div>
           <div className="inline-flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-3">
-             Registry Terminal v3
+            Registry Terminal v3
           </div>
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2 italic">
-            LUMINA
+            POINTNEST
           </h1>
           <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
             Identity Authorization Protocol
@@ -76,10 +76,12 @@ const LoginPage = () => {
                 {error}
               </div>
             )}
-            
+
             <div className="space-y-2">
-               <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Access Profile (Email)</label>
-               <div className="relative group">
+              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                Access Profile (Email)
+              </label>
+              <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                   <Mail size={16} />
                 </div>
@@ -91,13 +93,15 @@ const LoginPage = () => {
                   onChange={handleChange}
                   className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/10 focus:border-white focus:bg-white/[0.05] outline-none transition-all text-white font-bold text-sm rounded-2xl placeholder:text-gray-600"
                   required
-                  />
+                />
               </div>
             </div>
 
             <div className="space-y-2">
-               <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">Authorization Key</label>
-               <div className="relative group">
+              <label className="block text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">
+                Authorization Key
+              </label>
+              <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-600 group-focus-within:text-white transition-colors">
                   <Lock size={16} />
                 </div>
@@ -119,7 +123,9 @@ const LoginPage = () => {
                   type="checkbox"
                   className="w-4 h-4 rounded-lg bg-white/5 border-white/10 checked:bg-white checked:border-white transition-all appearance-none cursor-pointer border ring-offset-[#0A0A0B] focus:ring-1 focus:ring-white"
                 />
-                <span className="ml-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-gray-300 transition-colors">Persistent Session</span>
+                <span className="ml-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-gray-300 transition-colors">
+                  Persistent Session
+                </span>
               </label>
               <Link
                 to="/forgot-password"
@@ -161,8 +167,8 @@ const LoginPage = () => {
 
         {/* Global Footer */}
         <div className="mt-12 text-center">
-           <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
-            Secure Shell © 2026 Lumina Enterprise
+          <p className="text-[9px] font-black text-gray-700 uppercase tracking-[0.5em]">
+            Secure Shell © 2026 PointNest Enterprise
           </p>
         </div>
       </div>

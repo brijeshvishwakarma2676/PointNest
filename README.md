@@ -1,13 +1,14 @@
-# LUMINA · Enterprise Merchant Protocol
+# POINTNEST · Enterprise Merchant Protocol
 
-A mission-critical, high-performance merchant terminal designed for the next generation of entity loyalty. Lumina represents a shift from visual noise to structured, minimalist precision.
+A mission-critical, high-performance merchant terminal designed for the next generation of entity loyalty. PointNest represents a shift from visual noise to structured, minimalist precision.
 
 ## ⬛ The Technical Manifesto
 
-Lumina is built on the principle of **Zero-Latency Design**. Every interaction is engineered to provide immediate feedback, treating loyalty data as a strategic enterprise asset rather than a marketing afterthought.
+PointNest is built on the principle of **Zero-Latency Design**. Every interaction is engineered to provide immediate feedback, treating loyalty data as a strategic enterprise asset rather than a marketing afterthought.
 
 ### 🏛 Design Language
-- **Palette**: Pure Monochrome (Lumina Black/White) with high-contrast GRAY-50 utility zones.
+
+- **Palette**: Pure Monochrome (PointNest Black/White) with high-contrast GRAY-50 utility zones.
 - **Topology**: 2.5rem (40px) radius standard for primary structural containers.
 - **Typography**: Bold, high-tracking uppercase headers for "At-A-Glance" cognitive efficiency.
 - **Iconography**: Lucide High-Precision (1.5px - 2.5px stroke weight) for visual clarity.
@@ -23,7 +24,7 @@ Lumina is built on the principle of **Zero-Latency Design**. Every interaction i
 ## 🛠 Strategic Tech Stack
 
 - **Framework**: React 19 + Vite 6 + ESM
-- **Styling**: Tailwind CSS 4.0 (Custom Lumina Tokenization)
+- **Styling**: Tailwind CSS 4.0 (Custom PointNest Tokenization)
 - **Icons**: Lucide React (Enterprise Standard)
 - **State**: Zustand (Thread-safe enterprise context)
 - **Routing**: React Router 7 (Isolated shell navigation)
@@ -32,18 +33,21 @@ Lumina is built on the principle of **Zero-Latency Design**. Every interaction i
 ## ⚙️ Operational Setup
 
 1. **Protocol Initialization**:
+
    ```bash
    npm install
    ```
 
 2. **Regional Deployment**:
+
    ```bash
    npm run local    # Deploy localized development node
    npm run prod     # Generate production-ready mainframe bundle
    ```
 
 3. **Runtime Monitoring**:
-   Lumina utilizes standard browser dev tools for performance auditing. Goal: LCP < 1.0s.
+   PointNest utilizes standard browser dev tools for performance auditing. Goal: LCP < 1.0s.
 
 ---
-*Verified by Lumina Group · Secure. Minimal. Strategic.*
+
+_Verified by PointNest Group · Secure. Minimal. Strategic._
