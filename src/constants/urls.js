@@ -18,4 +18,5 @@ export default {
   coupons: "coupons",
   coupons_validate: "coupons/validate",
   coupons_redeem: "coupons/redeem",
+  ai_chat: "ai/chat",
 };
