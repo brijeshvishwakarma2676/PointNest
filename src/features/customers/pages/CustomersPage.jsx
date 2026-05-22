@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { customersApi } from "../api";
+import { Drawer } from "../../../components/ui";
+import { AddPurchaseForm } from "../../purchases/pages/AddPurchase";
 import { 
   Users, 
   Search, 
@@ -37,6 +39,10 @@ const CustomersPage = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isEditingCustomer, setIsEditingCustomer] = useState(false);
   const [fetchingDetails, setFetchingDetails] = useState(false);
+  const [ledgerHistory, setLedgerHistory] = useState([]);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+  const [purchaseDrawerOpen, setPurchaseDrawerOpen] = useState(false);
+  const [purchaseDrawerPhone, setPurchaseDrawerPhone] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -117,10 +123,31 @@ const CustomersPage = () => {
     }
   };
 
+  const fetchLedger = async (customerId) => {
+    setLoadingLedger(true);
+    try {
+      const response = await customersApi.getCustomerLedger({
+        customer_id: customerId,
+        page: 1,
+        size: 5,
+      });
+      if (response.success) {
+        setLedgerHistory(response.data.items || response.data || []);
+      } else {
+        console.error("Failed to fetch customer ledger:", response.message);
+      }
+    } catch (error) {
+      console.error("Error fetching ledger:", error);
+    } finally {
+      setLoadingLedger(false);
+    }
+  };
+
   const handleViewCustomer = async (id, editMode = false) => {
     setFetchingDetails(true);
     setViewCustomerModal(true);
     setIsEditingCustomer(editMode);
+    setLedgerHistory([]); // Reset ledger history on open
 
     try {
       const response = await customersApi.getCustomerDetails({
@@ -128,6 +155,7 @@ const CustomersPage = () => {
       });
       if (response.success) {
         setSelectedCustomer(response.data);
+        fetchLedger(id);
       } else {
         toast.error(response.message || "Failed to fetch customer details");
         setViewCustomerModal(false);
@@ -291,18 +319,15 @@ const CustomersPage = () => {
                         >
                           <Eye size={18} />
                         </button>
-                        <Link
-                          to={`/purchase?phone=${customer.phone}`}
+                        <button
+                          onClick={() => {
+                            setPurchaseDrawerPhone(customer.phone);
+                            setPurchaseDrawerOpen(true);
+                          }}
                           className="ml-2 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95"
                         >
                           Add Purchase
-                        </Link>
-                        <Link
-                          to={`/redeem?phone=${customer.phone}`}
-                          className="ml-2 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95"
-                        >
-                          Redeem Points
-                        </Link>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -461,133 +486,234 @@ const CustomersPage = () => {
         </div>
       )}
 
-      {/* View/Edit Modal */}
-      {viewCustomerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#0A0A0B]/60 backdrop-blur-sm animate-in fade-in duration-300">
-           <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-200 w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                <User size={16} className="text-gray-400" />
-                {isEditingCustomer ? "Modify Record" : "Client Dossier"}
-              </h3>
-              <div className="flex items-center gap-2">
-                {!isEditingCustomer && (
-                  <button
-                    onClick={() => setIsEditingCustomer(true)}
-                    className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100 flex items-center gap-2"
-                    title="Modify Record"
-                  >
-                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Modify</span>
-                    <Pencil size={18} />
-                  </button>
+      {/* View/Edit Dossier Drawer */}
+      <Drawer
+        isOpen={viewCustomerModal}
+        onClose={() => {
+          setViewCustomerModal(false);
+          setSelectedCustomer(null);
+        }}
+        title={
+          <div className="flex items-center gap-3">
+            <User size={16} className="text-gray-400" />
+            <span className="text-sm font-black text-gray-900 uppercase tracking-widest">
+              {isEditingCustomer ? "Modify Dossier" : "Client Dossier"}
+            </span>
+          </div>
+        }
+        size="md"
+        footer={
+          selectedCustomer && isEditingCustomer ? (
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleUpdateCustomer}
+                disabled={submitting}
+                className="w-full bg-[#0A0A0B] text-white py-4.5 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3"
+              >
+                {submitting ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <>
+                    <ShieldCheck size={18} />
+                    Verify & Save Changes
+                  </>
                 )}
-                <button
-                  onClick={() => {
-                    setViewCustomerModal(false);
-                    setSelectedCustomer(null);
-                  }}
-                   className="text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-xl hover:bg-gray-100"
-                >
-                  <X size={20} />
-                </button>
+              </button>
+            </div>
+          ) : selectedCustomer && !isEditingCustomer ? (
+            <button
+              onClick={() => setIsEditingCustomer(true)}
+              className="w-full bg-white border border-gray-200 text-gray-900 py-4.5 rounded-2xl font-bold text-sm hover:bg-gray-50 transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Pencil size={16} />
+              Modify Dossier
+            </button>
+          ) : null
+        }
+      >
+        {fetchingDetails ? (
+          <div className="py-24 text-center flex flex-col items-center justify-center">
+            <Loader2 className="animate-spin text-gray-900 mb-4" size={32} />
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              Querying Registry...
+            </p>
+          </div>
+        ) : selectedCustomer ? (
+          <div className="space-y-8">
+            {/* Dossier Header Info */}
+            <div className="text-center pb-6 border-b border-gray-100">
+              <div className="h-24 w-24 mx-auto bg-gray-100 rounded-[2rem] flex items-center justify-center font-black text-3xl text-gray-900 border border-gray-200 shadow-inner mb-4 relative group">
+                {selectedCustomer.name?.charAt(0).toUpperCase() || "?"}
+                <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-xl bg-black text-white flex items-center justify-center border-2 border-white shadow">
+                  <User size={12} />
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                SYSTEM ID: #{selectedCustomer.id}
               </div>
             </div>
 
-            {fetchingDetails ? (
-              <div className="p-16 text-center flex flex-col items-center justify-center">
-                 <Loader2 className="animate-spin text-gray-900 mb-4" size={32} />
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Querying Registry...</p>
+            {/* General Form Fields */}
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                  Legal Name
+                </label>
+                <input
+                  type="text"
+                  value={selectedCustomer.name || ""}
+                  onChange={(e) => setSelectedCustomer({ ...selectedCustomer, name: e.target.value })}
+                  disabled={!isEditingCustomer}
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-sm disabled:opacity-60"
+                  required
+                />
               </div>
-            ) : selectedCustomer ? (
-              <form onSubmit={handleUpdateCustomer} className="p-8">
-                <div className="text-center mb-10">
-                  <div className="h-20 w-20 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center font-black text-2xl text-gray-900 border border-gray-200 shadow-sm mb-4">
-                    {selectedCustomer.name?.charAt(0).toUpperCase() || "?"}
-                  </div>
-                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-50 border border-gray-200 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                    SYSTEM ID: #{selectedCustomer.id}
-                  </div>
-                </div>
 
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
-                      Legal Name
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedCustomer.name || ""}
-                      onChange={(e) => setSelectedCustomer({ ...selectedCustomer, name: e.target.value })}
-                      disabled={!isEditingCustomer}
-                      className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base disabled:opacity-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
-                      Contact Protocol
-                    </label>
-                    <input
-                      type="tel"
-                      maxLength={10}
-                      value={selectedCustomer.phone || ""}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                        setSelectedCustomer({ ...selectedCustomer, phone: val });
-                      }}
-                      disabled={!isEditingCustomer}
-                      className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-base disabled:opacity-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1 text-right">
-                      Yield Balance
-                    </label>
-                    <div className="w-full px-5 py-4 rounded-2xl bg-[#0A0A0B] text-white flex justify-between items-center">
-                       <CreditCard size={18} className="text-gray-500" />
-                       <span className="font-black text-xl tracking-tighter">{selectedCustomer.points}</span>
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                  Contact Protocol (Phone)
+                </label>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={selectedCustomer.phone || ""}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    setSelectedCustomer({ ...selectedCustomer, phone: val });
+                  }}
+                  disabled={!isEditingCustomer}
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-sm disabled:opacity-60"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={selectedCustomer.email || ""}
+                  onChange={(e) => setSelectedCustomer({ ...selectedCustomer, email: e.target.value })}
+                  disabled={!isEditingCustomer}
+                  placeholder="No Email Saved"
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-gray-900 outline-none transition-all text-gray-900 font-bold text-sm disabled:opacity-60"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+                  Yield Balance
+                </label>
+                <div className="w-full px-6 py-5 rounded-[2rem] bg-[#0A0A0B] text-white flex justify-between items-center shadow-lg shadow-gray-900/10">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60">
+                      <CreditCard size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Available points</p>
+                      <p className="text-xs font-black text-white/90">LOYALTY TOKEN</p>
                     </div>
                   </div>
+                  <span className="font-black text-2xl tracking-tighter text-white">{selectedCustomer.points} pts</span>
                 </div>
-
-                <div className="mt-10 flex flex-col gap-3">
-                   {isEditingCustomer && (
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="w-full bg-[#0A0A0B] text-white py-5 rounded-2xl font-bold text-base shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3"
-                    >
-                      {submitting ? (
-                        <Loader2 className="animate-spin" size={18} />
-                      ) : (
-                        <>
-                          <ShieldCheck size={18} />
-                          Verify & Authorize
-                        </>
-                      )}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setViewCustomerModal(false);
-                      setSelectedCustomer(null);
-                    }}
-                    className="w-full py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    Close Dossier
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="p-16 text-center text-[10px] font-black text-rose-500 uppercase tracking-widest">
-                Data Stream Corrupted
               </div>
-            )}
-           </div>
-        </div>
-      )}
+            </div>
+
+            {/* Points Ledger / Activity History Section */}
+            <div className="pt-6 border-t border-gray-100">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2">
+                <History size={14} />
+                Ledger Transaction History
+              </h4>
+
+              {loadingLedger ? (
+                <div className="py-8 text-center flex flex-col items-center justify-center">
+                  <Loader2 className="animate-spin text-gray-400 mb-2" size={20} />
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Retrieving history...</p>
+                </div>
+              ) : ledgerHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {ledgerHistory.map((entry, index) => {
+                    const isCredit = entry.type === "earn" || entry.type === "credit" || entry.points > 0;
+                    return (
+                      <div
+                        key={index}
+                        className="p-4 rounded-2xl border border-gray-100 bg-gray-50/50 flex justify-between items-center hover:bg-gray-50 transition-all"
+                      >
+                        <div>
+                          <p className="text-xs font-bold text-gray-900 capitalize">
+                            {entry.description || (isCredit ? "Points Earned" : "Points Redeemed")}
+                          </p>
+                          <p className="text-[9px] font-medium text-gray-400 mt-1">
+                            {entry.created_at ? new Date(entry.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            }) : "Recent transaction"}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs font-black px-2.5 py-1.5 rounded-xl border ${
+                            isCredit
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                              : "bg-rose-50 text-rose-700 border-rose-100"
+                          }`}
+                        >
+                          {isCredit ? "+" : ""}{entry.points} pts
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-8 text-center border border-dashed border-gray-200 rounded-2xl">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No transaction records found</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="py-24 text-center text-[10px] font-black text-rose-500 uppercase tracking-widest">
+            Data Stream Corrupted
+          </div>
+        )}
+      </Drawer>
+
+      {/* Add Purchase Drawer */}
+      <Drawer
+        isOpen={purchaseDrawerOpen}
+        onClose={() => {
+          setPurchaseDrawerOpen(false);
+          setPurchaseDrawerPhone("");
+        }}
+        title={
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-black text-gray-900 uppercase tracking-widest">
+              Record Yield Transaction
+            </span>
+          </div>
+        }
+        size="lg"
+      >
+        {purchaseDrawerOpen && (
+          <AddPurchaseForm
+            initialPhone={purchaseDrawerPhone}
+            isDrawer={true}
+            onCancel={() => {
+              setPurchaseDrawerOpen(false);
+              setPurchaseDrawerPhone("");
+            }}
+            onSuccess={() => {
+              setPurchaseDrawerOpen(false);
+              setPurchaseDrawerPhone("");
+              fetchCustomers(pagination.page);
+            }}
+          />
+        )}
+      </Drawer>
     </div>
   );
 };

@@ -128,7 +128,6 @@ const Layout = ({ children }) => {
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Customers", path: "/customers", icon: Users },
     { name: "Add Purchase", path: "/purchase", icon: PlusCircle },
-    { name: "Redeem Points", path: "/redeem", icon: CreditCard },
     { name: "Purchases", path: "/purchases", icon: Receipt },
     { name: "Redemptions", path: "/history", icon: History },
     { name: "Coupons", path: "/coupons", icon: TicketPercent },
