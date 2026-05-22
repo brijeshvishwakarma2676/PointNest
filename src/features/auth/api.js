@@ -19,6 +19,10 @@ export const authApi = {
   register: async (userData) => {
     return await apiClient.post(urls.register, userData);
   },
+  
+  googleAuth: async (idToken) => {
+    return await apiClient.post(urls.google_auth, { id_token: idToken });
+  },
 
   getMe: async (date_filter = "all") => {
     return await apiClient.get(urls.get_me, { params: { date_filter } });

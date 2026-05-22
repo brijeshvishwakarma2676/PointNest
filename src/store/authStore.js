@@ -60,6 +60,53 @@ const useAuthStore = create(
         }
       },
 
+      // Login with Google Action
+      loginWithGoogle: async (idToken) => {
+        set({ isLoading: true, error: null });
+        try {
+          const loginResponse = await authApi.googleAuth(idToken);
+
+          if (loginResponse.success) {
+            const { access_token, refresh_token } = loginResponse.data;
+
+            // Save tokens to localStorage for persistent interceptor access
+            localStorage.setItem("access_token", access_token);
+            localStorage.setItem("refresh_token", refresh_token);
+
+            // Fetch User Profile Data
+            try {
+              const userResponse = await authApi.getMe();
+
+              // Save complete user state (token and profile)
+              set({
+                accessToken: access_token,
+                refreshToken: refresh_token,
+                user: userResponse.data || userResponse,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+
+              return { success: true, message: loginResponse.message };
+            } catch (error) {
+              // If profile fetch fails, clean up tokens
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+              set({ isLoading: false, error: "Failed to fetch user profile" });
+              return {
+                success: false,
+                message: "Failed to fetch user profile",
+              };
+            }
+          } else {
+            set({ isLoading: false, error: loginResponse.message });
+            return { success: false, message: loginResponse.message };
+          }
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          return { success: false, message: error.message };
+        }
+      },
+
       // Register Action
       register: async (userData) => {
         set({ isLoading: true, error: null });

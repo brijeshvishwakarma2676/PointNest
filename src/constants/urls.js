@@ -1,6 +1,7 @@
 export default {
   login: "auth/login",
   register: "auth/register",
+  google_auth: "auth/google",
   refresh_token: "auth/refresh",
   forgot_password: "auth/forgot-password",
   verify_otp: "auth/verify-otp",

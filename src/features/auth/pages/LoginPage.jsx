@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/authStore";
 import toast from "react-hot-toast";
@@ -21,11 +21,72 @@ import {
  */
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, loginWithGoogle, isLoading, error, clearError } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    const handleGoogleResponse = async (response) => {
+      const { credential } = response;
+      if (!credential) {
+        toast.error("Google Authentication failed to retrieve ID Token");
+        return;
+      }
+      const result = await loginWithGoogle(credential);
+      if (result.success) {
+        toast.success(result.message || "Connection Established with Google");
+        navigate("/dashboard");
+      } else {
+        toast.error(result.message || "Google Authentication Failed");
+      }
+    };
+
+    const initializeGoogleSignIn = () => {
+      if (!window.google) return;
+      
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "your-google-client-id-here.apps.googleusercontent.com";
+      
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleResponse,
+      });
+
+      // Render the official, high-quality Google Button
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-signin-btn-login"),
+        { 
+          theme: "filled_black", 
+          size: "large", 
+          text: "continue_with",
+          shape: "rectangular",
+          width: 320 
+        }
+      );
+    };
+
+    const loadGoogleScript = () => {
+      if (document.getElementById("google-gsi-client")) {
+        initializeGoogleSignIn();
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.id = "google-gsi-client";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        initializeGoogleSignIn();
+      };
+      script.onerror = () => {
+        console.error("Failed to load Google Identity Services SDK");
+      };
+      document.head.appendChild(script);
+    };
+
+    loadGoogleScript();
+  }, [loginWithGoogle, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -151,7 +212,19 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div className="mt-12 pt-8 border-t border-white/5 text-center">
+          <div className="relative flex py-6 items-center">
+            <div className="flex-grow border-t border-white/5"></div>
+            <span className="flex-shrink mx-4 text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+              Secure Auth Link
+            </span>
+            <div className="flex-grow border-t border-white/5"></div>
+          </div>
+
+          <div className="flex justify-center w-full">
+            <div id="google-signin-btn-login" className="w-full flex justify-center max-w-xs overflow-hidden rounded-2xl border border-white/10 hover:border-white/20 transition-all"></div>
+          </div>
+
+          <div className="mt-8 pt-8 border-t border-white/5 text-center">
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
               Not a verified partner?
             </p>
